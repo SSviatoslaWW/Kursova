@@ -2,18 +2,41 @@
 
 import SwiftUI
 
+// MARK: - СТИЛЬ КНОПКИ З ЕФЕКТОМ ГРАДІЄНТА (ОБОВ'ЯЗКОВО ПЕРЕД СТРУКТУРОЮ VIEW)
+struct GradientPressableButtonStyle: ButtonStyle {
+    
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .padding(.horizontal, 10)
+            .padding(.vertical, 8)
+            .background(
+                LinearGradient(
+                    gradient: Gradient(colors: [
+                        Color.white.opacity(0.3),
+                        Color.white.opacity(configuration.isPressed ? 0.7 : 0.5)
+                    ]),
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            )
+            .cornerRadius(8)
+            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+            .foregroundColor(.white)
+            .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
+    }
+}
+
+
 struct WeatherDetailView: View {
-    // 🛑 Видалили @Environment(\.safeAreaInsets), щоб уникнути помилок
     
     @ObservedObject var viewModel: WeatherViewModel
     @ObservedObject var favoritesVM: FavoritesViewModel
     @State private var cityInput: String = ""
     
     var body: some View {
-        // 🛑 Використовуємо GeometryReader для безпечного визначення висоти
         GeometryReader { geometry in
             ZStack {
-                // 1. Градієнт
+                
                 LinearGradient(
                     gradient: Gradient(colors: viewModel.getBackgroundGradient()),
                     startPoint: .topLeading,
@@ -21,7 +44,6 @@ struct WeatherDetailView: View {
                 )
                 .ignoresSafeArea(.all)
 
-                // 2. КОНТЕНТ
                 VStack(spacing: 15) {
                     
                     Spacer().frame(height: 1)
@@ -34,9 +56,12 @@ struct WeatherDetailView: View {
                             .foregroundColor(.white).colorScheme(.dark)
                         
                         Button("Пошук") {
-                            viewModel.fetchWeather(cityInput)
+                            if !cityInput.isEmpty {
+                                // 🛑 РУЧНИЙ ПОШУК КОРИСТУВАЧА: city, nil, nil
+                                viewModel.fetchWeather(cityInput, nil, nil)
+                            }
                         }
-                        .buttonStyle(.borderedProminent).tint(Color.white.opacity(0.5))
+                        .buttonStyle(GradientPressableButtonStyle())
                     }
                     .padding(.horizontal)
                     
@@ -44,7 +69,8 @@ struct WeatherDetailView: View {
                     if viewModel.isLoading {
                         ProgressView("Завантаження погоди...").foregroundColor(.white)
                     } else if let errorMsg = viewModel.errorMessage {
-                        Text("❌ Помилка: \(errorMsg)").foregroundColor(.red).padding()
+                        // 🛑 ВИВІД ПОМИЛКИ: "Місто не знайдено."
+                        Text("❌ \(errorMsg)").foregroundColor(.red).padding()
                     }
                     
                     // MARK: - ОСНОВНИЙ ВЕРТИКАЛЬНИЙ СКРОЛ
@@ -53,6 +79,7 @@ struct WeatherDetailView: View {
                             
                             // MARK: - Поточна Погода
                             if let weather = viewModel.currentWeather {
+                                // ... (Відображення погоди)
                                 VStack(spacing: 10) {
                                     Text(weather.name).font(.largeTitle).bold()
                                     
@@ -74,8 +101,10 @@ struct WeatherDetailView: View {
                                     
                                     Text(weather.weather.first?.description.capitalized ?? "Невідомо").font(.title3)
                                     
+                                    // КНОПКА ДОДАТИ ДО УЛЮБЛЕНИХ
                                     Button { favoritesVM.addCity(weather.name) } label: { Label("Додати до Улюблених", systemImage: "star.fill") }
-                                    .buttonStyle(.borderedProminent).tint(.white.opacity(0.5)).padding(.top)
+                                        .buttonStyle(GradientPressableButtonStyle())
+                                        .padding(.top)
                                     
                                     // MARK: - 1. Погодинний Прогноз
                                     Text("Погодинний Прогноз (24 год)").font(.headline)
@@ -105,13 +134,14 @@ struct WeatherDetailView: View {
                             
                             // Заглушка, якщо даних немає
                             else if !viewModel.isLoading && viewModel.errorMessage == nil {
-                                Spacer()
-                                Text("Введіть місто для перегляду погоди").foregroundColor(.white.opacity(0.8))
-                                Spacer()
+                                VStack {
+                                    Spacer()
+                                    Text("Введіть місто для перегляду погоди").foregroundColor(.white.opacity(0.8))
+                                    Spacer()
+                                }
                             }
                             
                         }
-                        // 🛑 КЛЮЧОВЕ ВИПРАВЛЕННЯ: minHeight = висота GeometryReader - приблизна висота верхніх елементів (приблизно 100pt)
                         .frame(minHeight: geometry.size.height - 100)
                         
                     }
@@ -119,12 +149,13 @@ struct WeatherDetailView: View {
                 .padding(.top, 10)
                 .foregroundColor(.white)
                 .shadow(color: .black.opacity(0.8), radius: 5, x: 0, y: 2)
-                .background(Color.clear) 
+                .background(Color.clear)
             }
         }
         .onAppear {
+            // 🛑 АКТИВАЦІЯ CORE LOCATION
             if viewModel.currentWeather == nil {
-                viewModel.fetchWeather(viewModel.currentCity)
+                viewModel.locationManager.requestLocation()
             }
         }
     }
