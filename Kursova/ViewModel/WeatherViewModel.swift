@@ -13,14 +13,15 @@ class WeatherViewModel: NSObject, ObservableObject, LocationManagerDelegate {
     @Published var currentWeather: CurrentWeatherResponse?
     @Published var forecastItems: [ForecastItem] = []
     @Published var dailyForecast: [ForecastItem] = []
+    @Published var groupedDailyForecast: [Date: [ForecastItem]] = [:] // ⬅️ ДЛЯ ДЕТАЛІЗАЦІЇ
     @Published var isLoading = false
     @Published var errorMessage: String?
     
     private let service = WeatherService()
     public var locationManager: LocationManager
     
-    private var isInitialLoad = true // 🛑 НОВИЙ ПРАПОР: Для контролю першого запуску
-    private var isUserSearch = false // Для розрізнення пошуку користувача
+    private var isInitialLoad = true
+    private var isUserSearch = false
     
     override init() {
         self.currentCity = DEFAULT_CITY
@@ -28,22 +29,34 @@ class WeatherViewModel: NSObject, ObservableObject, LocationManagerDelegate {
         super.init()
         self.locationManager.delegate = self
         
-        // 🛑 Виклик LocationManager.requestLocation() перенесено у View/WeatherDetailView.swift onAppear
+        // Виклик перенесено у View/WeatherDetailView.swift onAppear
     }
     
-    // MARK: - Градієнт (без змін)
+    // MARK: - Логіка Градієнту (на основі температури)
     func getBackgroundGradient() -> [Color] {
-        guard let mainCondition = currentWeather?.weather.first?.main else {
+        guard let weatherData = currentWeather else {
             return [Color(red: 0.1, green: 0.1, blue: 0.2), Color(red: 0.3, green: 0.3, blue: 0.4)]
         }
+        let mainCondition = weatherData.weather.first?.main ?? "Default"
+        let temp = weatherData.main.temp
+        
+        // 1. КРИТИЧНІ УМОВИ
         switch mainCondition {
-        case "Clear": return [Color(red: 0.3, green: 0.7, blue: 0.9), Color(red: 0.9, green: 0.6, blue: 0.2)]
-        case "Clouds": return [Color(red: 0.4, green: 0.5, blue: 0.6), Color(red: 0.7, green: 0.7, blue: 0.7)]
-        case "Rain", "Drizzle": return [Color(red: 0.2, green: 0.3, blue: 0.5), Color(red: 0.1, green: 0.2, blue: 0.3)]
-        case "Thunderstorm": return [Color(red: 0.1, green: 0.0, blue: 0.2), Color(red: 0.3, green: 0.2, blue: 0.4)]
-        case "Snow": return [Color(red: 0.7, green: 0.8, blue: 1.0), Color(red: 0.4, green: 0.5, blue: 0.7)]
-        case "Mist", "Smoke", "Haze", "Fog": return [Color(red: 0.7, green: 0.7, blue: 0.7), Color(red: 0.8, green: 0.8, blue: 0.9)]
-        default: return [Color(red: 0.5, green: 0.5, blue: 0.5), Color(red: 0.8, green: 0.8, blue: 0.8)]
+        case "Thunderstorm": return [Color(red: 0.3, green: 0.1, blue: 0.4), Color(red: 0.1, green: 0.1, blue: 0.15)]
+        case "Snow": return [Color(red: 0.6, green: 0.7, blue: 0.9), Color(red: 0.85, green: 0.9, blue: 0.95)]
+        case "Rain", "Drizzle": return [Color(red: 0.3, green: 0.4, blue: 0.6), Color(red: 0.4, green: 0.5, blue: 0.7)]
+        default: break
+        }
+        
+        // 2. ТЕМПЕРАТУРНІ КАТЕГОРІЇ
+        if temp >= 30 {
+            return [Color(red: 0.9, green: 0.5, blue: 0.1), Color(red: 1.0, green: 0.8, blue: 0.4)]
+        } else if temp >= 15 {
+            return [Color(red: 0.2, green: 0.6, blue: 0.85), Color(red: 0.6, green: 0.8, blue: 1.0)]
+        } else if temp >= 5 {
+            return [Color(red: 0.4, green: 0.5, blue: 0.6), Color(red: 0.7, green: 0.75, blue: 0.8)]
+        } else {
+            return [Color(red: 0.2, green: 0.2, blue: 0.5), Color(red: 0.4, green: 0.4, blue: 0.7)]
         }
     }
     
@@ -51,19 +64,17 @@ class WeatherViewModel: NSObject, ObservableObject, LocationManagerDelegate {
     lazy var fetchWeather: (_ city: String?, _ lat: Double?, _ lon: Double?) -> Void = { [weak self] city, lat, lon in
         guard let self = self else { return }
         
-        // 🛑 ВСТАНОВЛЕННЯ ПРАПОРІВ
         self.isUserSearch = (city != self.DEFAULT_CITY && city != nil && lat == nil && lon == nil)
         
         self.isLoading = true
         self.errorMessage = nil
         
         if let lat = lat, let lon = lon {
-            // Запит за координатами
             self.fetchWeatherAndForecast(lat: lat, lon: lon, isInitialLoad: self.isInitialLoad)
         } else if let city = city, !city.isEmpty {
             self.currentCity = city
-            // Запит за містом
-            self.fetchWeatherAndForecast(city: city, isInitialLoad: self.isInitialLoad)
+            let isReserve = (city == self.DEFAULT_CITY)
+            self.fetchWeatherAndForecast(city: city, isInitialLoad: self.isInitialLoad, isSystemReserve: isReserve)
         }
     }
     
@@ -71,53 +82,48 @@ class WeatherViewModel: NSObject, ObservableObject, LocationManagerDelegate {
     
     private func fetchWeatherAndForecast(lat: Double, lon: Double, isInitialLoad: Bool) {
         service.fetchCurrentWeather(lat: lat, lon: lon) { [weak self] currentResult in
-            self?.handleFetchResults(currentResult: currentResult, isLocationAttempt: true)
+            self?.handleFetchResults(currentResult: currentResult, isLocationAttempt: true, isSystemReserve: false, lat: lat, lon: lon, city: nil)
         }
     }
     
-    private func fetchWeatherAndForecast(city: String, isInitialLoad: Bool) {
+    private func fetchWeatherAndForecast(city: String, isInitialLoad: Bool, isSystemReserve: Bool) {
         service.fetchCurrentWeather(city: city) { [weak self] currentResult in
-            self?.handleFetchResults(currentResult: currentResult, isLocationAttempt: false)
+            self?.handleFetchResults(currentResult: currentResult, isLocationAttempt: false, isSystemReserve: isSystemReserve, lat: nil, lon: nil, city: city)
         }
     }
 
-    private func handleFetchResults(currentResult: Result<CurrentWeatherResponse, APIError>, isLocationAttempt: Bool) {
+    private func handleFetchResults(currentResult: Result<CurrentWeatherResponse, APIError>, isLocationAttempt: Bool, isSystemReserve: Bool, lat: Double?, lon: Double?, city: String?) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            
-            self.isInitialLoad = false // Після першої спроби прапор знімаємо
             
             switch currentResult {
             case .success(let response):
                 self.currentWeather = response
                 self.currentCity = response.name
-                // Отримуємо прогноз або за координатами, або за назвою
-                let cityToFetch = isLocationAttempt ? nil : response.name
-                self.fetchForecast(city: cityToFetch, lat: response.coord.lat, lon: response.coord.lon)
+                self.isInitialLoad = false
+                self.fetchForecast(city: self.currentCity, lat: response.coord.lat, lon: response.coord.lon)
                 
             case .failure(let error):
                 
-                // 🛑 1. ОБРОБКА НЕЗНАЙДЕНОГО МІСТА ПІСЛЯ РУЧНОГО ПОШУКУ
+                // 1. ОБРОБКА НЕЗНАЙДЕНОГО МІСТА ПІСЛЯ РУЧНОГО ПОШУКУ
                 if error == .cityNotFound && self.isUserSearch {
                     self.errorMessage = "Місто не знайдено. Перевірте назву."
                     self.currentWeather = nil
                     self.isLoading = false
                     
-                // 🛑 2. ОБРОБКА ПОМИЛКИ ПРИ ПОЧАТКОВОМУ ЗАВАНТАЖЕННІ (резерв Львів)
-                } else if self.isInitialLoad {
+                // 2. ОБРОБКА ПОМИЛКИ ПРИ ПОЧАТКОВОМУ ЗАВАНТАЖЕННІ (резерв Львів)
+                } else if !isSystemReserve {
                     self.currentCity = self.DEFAULT_CITY
-                    self.fetchWeatherAndForecast(city: self.DEFAULT_CITY, isInitialLoad: false) // Спроба завантажити Львів
-                    
-                // 3. Інші помилки (проблеми з мережею, декодуванням)
+                    self.fetchWeatherAndForecast(city: self.DEFAULT_CITY, isInitialLoad: false, isSystemReserve: true)
                 } else {
-                    self.errorMessage = error.localizedDescription
+                    self.errorMessage = "Критична помилка мережі. Не вдалося завантажити дані."
                     self.isLoading = false
                 }
             }
         }
     }
     
-    // ... (fetchForecast та handleForecastResult - залишаємо без змін)
+    // 🛑 ОНОВЛЕНО: Функція завантаження прогнозу
     private func fetchForecast(city: String?, lat: Double?, lon: Double?) {
         if let lat = lat, let lon = lon {
             service.fetchForecast(lat: lat, lon: lon) { [weak self] forecastResult in
@@ -139,6 +145,7 @@ class WeatherViewModel: NSObject, ObservableObject, LocationManagerDelegate {
             case .success(let response):
                 self.forecastItems = Array(response.list.prefix(8))
                 self.dailyForecast = self.filterDailyForecast(response.list)
+                self.groupedDailyForecast = self.groupForecastByDay(response.list) // ⬅️ ВИКЛИК ГРУПУВАННЯ
             case .failure(let error):
                 self.errorMessage = self.errorMessage ?? error.localizedDescription
             }
@@ -162,18 +169,22 @@ class WeatherViewModel: NSObject, ObservableObject, LocationManagerDelegate {
         }
         return filteredItems
     }
+    
+    private func groupForecastByDay(_ list: [ForecastItem]) -> [Date: [ForecastItem]] {
+        let calendar = Calendar.current
+        let grouped = Dictionary(grouping: list) { item in
+            calendar.startOfDay(for: item.date)
+        }
+        return grouped
+    }
 
     // MARK: - LocationManagerDelegate (Обробка від LocationManager)
     
-    // 🛑 ВИКЛИКАЄТЬСЯ: Якщо координати отримано успішно
     func didUpdateLocation(lat: Double, lon: Double) {
-        // Успіх: викликаємо пошук погоди за координатами
-        self.fetchWeather(nil, lat, lon) // CityName = nil, оскільки використовуємо координати
+        self.fetchWeather(nil, lat, lon)
     }
     
-    // 🛑 ВИКЛИКАЄТЬСЯ: Якщо користувач відмовив або сталася помилка
     func didFailWithError() {
-        // Помилка/Відмова: якщо це був перший запуск, переходимо до Львова
         if self.isInitialLoad {
             self.fetchWeather(self.DEFAULT_CITY, nil, nil)
         }

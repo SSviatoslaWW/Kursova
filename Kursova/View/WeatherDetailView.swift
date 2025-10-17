@@ -2,7 +2,7 @@
 
 import SwiftUI
 
-// MARK: - СТИЛЬ КНОПКИ З ЕФЕКТОМ ГРАДІЄНТА (ОБОВ'ЯЗКОВО ПЕРЕД СТРУКТУРОЮ VIEW)
+// MARK: - СТИЛЬ КНОПКИ З ЕФЕКТОМ ГРАДІЄНТА
 struct GradientPressableButtonStyle: ButtonStyle {
     
     func makeBody(configuration: Configuration) -> some View {
@@ -57,7 +57,6 @@ struct WeatherDetailView: View {
                         
                         Button("Пошук") {
                             if !cityInput.isEmpty {
-                                // 🛑 РУЧНИЙ ПОШУК КОРИСТУВАЧА: city, nil, nil
                                 viewModel.fetchWeather(cityInput, nil, nil)
                             }
                         }
@@ -69,17 +68,15 @@ struct WeatherDetailView: View {
                     if viewModel.isLoading {
                         ProgressView("Завантаження погоди...").foregroundColor(.white)
                     } else if let errorMsg = viewModel.errorMessage {
-                        // 🛑 ВИВІД ПОМИЛКИ: "Місто не знайдено."
                         Text("❌ \(errorMsg)").foregroundColor(.red).padding()
                     }
                     
                     // MARK: - ОСНОВНИЙ ВЕРТИКАЛЬНИЙ СКРОЛ
                     ScrollView(.vertical, showsIndicators: false) {
-                        VStack(spacing: 15) {
-                            
-                            // MARK: - Поточна Погода
+                        
+                        // 🛑 ФІКС: Об'єднуємо контент у єдиний контейнер для коректної логіки if/else
+                        VStack {
                             if let weather = viewModel.currentWeather {
-                                // ... (Відображення погоди)
                                 VStack(spacing: 10) {
                                     Text(weather.name).font(.largeTitle).bold()
                                     
@@ -101,7 +98,6 @@ struct WeatherDetailView: View {
                                     
                                     Text(weather.weather.first?.description.capitalized ?? "Невідомо").font(.title3)
                                     
-                                    // КНОПКА ДОДАТИ ДО УЛЮБЛЕНИХ
                                     Button { favoritesVM.addCity(weather.name) } label: { Label("Додати до Улюблених", systemImage: "star.fill") }
                                         .buttonStyle(GradientPressableButtonStyle())
                                         .padding(.top)
@@ -124,12 +120,11 @@ struct WeatherDetailView: View {
                                         .frame(maxWidth: .infinity, alignment: .leading).padding(.top, 20)
 
                                     ForEach(viewModel.dailyForecast, id: \.dt) { item in
-                                        DailyForecastItemView(item: item)
+                                        DailyForecastItemView(item: item, viewModel: viewModel)
                                     }
                                 }
                                 .padding(.horizontal)
                                 .padding(.bottom, 20)
-                                
                             }
                             
                             // Заглушка, якщо даних немає
@@ -141,17 +136,18 @@ struct WeatherDetailView: View {
                                 }
                             }
                             
-                        }
+                        } // Закриття Внутрішнього VStack
+                        // 🛑 ФІКС: minHeight застосовується до ScrollView
                         .frame(minHeight: geometry.size.height - 100)
                         
-                    }
-                }
+                    } // Закриття ScrollView
+                } // Закриття VStack (основний)
                 .padding(.top, 10)
                 .foregroundColor(.white)
                 .shadow(color: .black.opacity(0.8), radius: 5, x: 0, y: 2)
                 .background(Color.clear)
-            }
-        }
+            } // Закриття ZStack
+        } // Закриття GeometryReader
         .onAppear {
             // 🛑 АКТИВАЦІЯ CORE LOCATION
             if viewModel.currentWeather == nil {
