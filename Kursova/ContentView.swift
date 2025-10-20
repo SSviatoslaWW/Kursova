@@ -41,7 +41,7 @@ struct ContentView: View {
             }
             // 🛑 ВИПРАВЛЕННЯ: Стилі TabView
             .background(Color.clear)
-            .tint(.yellow) // Змінено на жовтий для кращого контрасту
+            .tint(.orange) // Змінено на жовтий для кращого контрасту
             .toolbarBackground(.hidden, for: .tabBar)
         }
     }

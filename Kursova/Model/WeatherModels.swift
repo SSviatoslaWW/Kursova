@@ -9,15 +9,15 @@ import Foundation
 // Допоміжні структури для декодування вкладених об'єктів JSON
 
 struct Coordinates: Decodable {
-    let lon: Double // Довгота
-    let lat: Double // Широта
+    let lon: Double // Довгота (longitude)
+    let lat: Double // Широта (latitude)
 }
 struct Wind: Decodable {
-    let speed: Double? // Швидкість вітру
-    let deg: Int?      // Напрямок вітру
+    let speed: Double? // Швидкість вітру (м/с)
+    let deg: Int?      // Напрямок вітру (градуси)
 }
 struct Clouds: Decodable {
-    let all: Int // Хмарність у відсотках
+    let all: Int // Хмарність у відсотках (0-100%)
 }
 struct SystemInfo: Decodable {
     let country: String // Код країни (наприклад, UA)
@@ -28,15 +28,15 @@ struct SystemInfo: Decodable {
 // Головна структура для відповіді поточної погоди
 struct CurrentWeatherResponse: Decodable {
     let coord: Coordinates
-    let weather: [WeatherCondition] // Масив з основними умовами та іконкою
+    let weather: [WeatherCondition] // Масив основних умов (опис, іконка)
     let base: String
     let main: MainWeather       // Об'єкт з температурою та тиском
-    let visibility: Int?
+    let visibility: Int?        // Видимість (метри)
     let wind: Wind?
     let clouds: Clouds?
     let dt: Int                 // Час оновлення даних (Unix timestamp)
     let sys: SystemInfo
-    let timezone: Int
+    let timezone: Int           // Зсув від UTC у секундах
     let id: Int
     let name: String            // Назва міста, повернута API
     let cod: Int
@@ -57,7 +57,7 @@ struct MainWeather: Decodable {
         case tempMax = "temp_max"
     }
     
-    // Обчислювана властивість для форматування температури
+    // Обчислювана властивість: Температура, округлена до цілого, з °C
     var temperatureString: String {
         return String(format: "%.0f°C", temp)
     }
@@ -65,7 +65,7 @@ struct MainWeather: Decodable {
 
 // Структура для погодних умов (WeatherCondition)
 struct WeatherCondition: Decodable {
-    let main: String        // Основна група (Clear, Rain, Snow) - використовується для градієнта
+    let main: String        // Основна група (Clear, Rain, Snow) - для логіки градієнта
     let description: String // Детальний опис
     let icon: String        // Код іконки
     
@@ -96,11 +96,22 @@ struct ForecastItem: Decodable {
         Date(timeIntervalSince1970: TimeInterval(dt))
     }
     
-    // 🛑 fullDayName: Повна назва дня для детального модального вікна
+    // 🛑 fullDayName: Повна назва дня (використовується у модальному вікні)
     var fullDayName: String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "EEEE" // Формат: Понеділок, Вівторок
+        formatter.dateFormat = "EEEE" // Формат: Понеділок
         formatter.locale = Locale(identifier: "uk_UA")
         return formatter.string(from: date).capitalized
+    }
+
+    // 🛑 dayOfWeekShort: Скорочена назва дня (використовується для карток 5-денного прогнозу)
+    var dayOfWeekShort: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEE" // Формат: Пн, Вт
+        formatter.locale = Locale(identifier: "uk_UA")
+        
+        let shortName = formatter.string(from: date)
+        // Мануально робимо першу букву великою, щоб уникнути конфлікту локалі.
+        return shortName.prefix(1).uppercased() + shortName.dropFirst()
     }
 }
