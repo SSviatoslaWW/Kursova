@@ -1,174 +1,162 @@
-// View/FavoritesView.swift
-
 import SwiftUI
-
-// MARK: - FavoritesView (Головна View)
 
 struct FavoritesView: View {
     
-    // MARK: - Властивості та Стан
+    // MARK: - Властивості
     
     @ObservedObject var favoritesVM: FavoritesViewModel
     @ObservedObject var weatherVM: WeatherViewModel
     
-    // 🛑 Стан: Режим редагування
+    // Приймає замикання з ContentView для обробки натискання на місто
+    let onCitySelect: (String) -> Void
+    
     @State private var isEditing: Bool = false
     
-    // Константа для зміщення вмісту в режимі редагування
-    private let editingOffset: CGFloat = 20
-    private let paddingOffset: CGFloat = 16
-    private let itemSpacing: CGFloat = 12
-    
-    // MARK: - Body View
+    // MARK: - Body
     
     var body: some View {
-        GeometryReader { geometry in
-            ZStack {
-                // 1. Градієнтний Фон (Global)
-                LinearGradient(
-                    gradient: Gradient(colors: weatherVM.getBackgroundGradient()),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
+        ZStack {
+            // Фон, який динамічно змінюється, синхронізуючись з головним екраном
+            LinearGradient(
+                gradient: Gradient(colors: weatherVM.getBackgroundGradient()),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+
+            // Основний контейнер для контенту
+            VStack(spacing: 0) {
+                HeaderView(
+                    isEditing: $isEditing,
+                    showEditButton: favoritesVM.shouldShowEditButton
                 )
-                .ignoresSafeArea(.all)
                 
-                VStack(spacing: 0) {
-                    
-                    // 1. Заголовок та Кнопка Редагування
-                    HeaderView(isEditing: $isEditing)
-                    
-                    // 2. Список (ScrollView)
+                if favoritesVM.favoriteCities.isEmpty {
+                    EmptyStateView()
+                    Spacer()
+                } else {
                     ScrollView {
-                        LazyVStack(spacing: itemSpacing) {
-                            
-                            // Заглушка, якщо немає міст
-                            if favoritesVM.favoriteCities.isEmpty {
-                                EmptyStateView()
-                            }
-                            
-                            // 🛑 Картки міст
+                        LazyVStack(spacing: 12) {
                             ForEach(favoritesVM.favoriteCities.indices, id: \.self) { index in
+                                let city = favoritesVM.favoriteCities[index]
+                                
                                 CityCardRow(
-                                    city: favoritesVM.favoriteCities[index],
+                                    city: city,
                                     index: index,
                                     isEditing: isEditing,
-                                    editingOffset: editingOffset,
-                                    paddingOffset: paddingOffset,
-                                    weatherVM: weatherVM,
-                                    favoritesVM: favoritesVM
+                                    favoritesVM: favoritesVM,
+                                    onSelect: {
+                                        onCitySelect(city)
+                                    }
                                 )
-                            } // Закриття ForEach
-                            
-                            // Додатковий Spacer для розтягування фону
-                            Spacer(minLength: geometry.size.height - 300)
-                            
-                        } // Закриття LazyVStack
+                            }
+                        }
                         .padding(.horizontal, 16)
-                        
-                    } // Закриття ScrollView
-                    .scrollBounceBehavior(.basedOnSize) // Умовне керування відскоком
-                    
-                } // Закриття VStack (основний)
-                .foregroundColor(.white)
-                .shadow(color: .black.opacity(0.6), radius: 3, x: 0, y: 1)
-            } // Закриття ZStack
-        } // Закриття GeometryReader
-    }
-    
-    // =============================================================
-    // MARK: - ПРИВАТНІ СТРУКТУРИ UI (Subviews)
-    // =============================================================
-    
-    /// Структура для порожнього стану списку.
-    private struct EmptyStateView: View {
-        var body: some View {
-            Text("Натисніть 'Додати до Улюблених' на головному екрані.")
-                .foregroundColor(.white.opacity(0.8))
-                .padding(.top, 40)
+                        .padding(.top, 10)
+                    }
+                    .scrollBounceBehavior(.basedOnSize)
+                }
+            }
+            .foregroundColor(.white)
+        }
+        // ❗️ ВИПРАВЛЕНО: Використано новий синтаксис .onChange для iOS 17+
+        // Ми отримуємо старе і нове значення, але використовуємо тільки нове (`newValue`).
+        .onChange(of: favoritesVM.favoriteCities) { oldValue, newValue in
+            // Якщо новий масив порожній і ми все ще в режимі редагування...
+            if newValue.isEmpty && isEditing {
+                withAnimation(.spring()) {
+                    // ...автоматично виходимо з режиму редагування.
+                    isEditing = false
+                }
+            }
         }
     }
     
-    /// Структура для верхнього заголовка та кнопки редагування.
+    // MARK: - Внутрішні компоненти UI (Subviews)
+    
+    private struct EmptyStateView: View {
+        var body: some View {
+            Text("Міста, які ви додасте до улюблених, з'являться тут.")
+                .font(.headline)
+                .multilineTextAlignment(.center)
+                .foregroundColor(.white.opacity(0.8))
+                .padding(.top, 50)
+                .padding(.horizontal)
+        }
+    }
+    
     private struct HeaderView: View {
         @Binding var isEditing: Bool
-        
+        let showEditButton: Bool
+
         var body: some View {
             HStack {
-                Text("Улюблені Міста")
+                Text("Улюблені")
                     .font(.largeTitle).bold()
                 Spacer()
                 
-                // КНОПКА РЕДАГУВАННЯ
-                Button(isEditing ? "Done" : "Edit") {
-                    withAnimation {
-                        isEditing.toggle()
+                if showEditButton {
+                    Button(isEditing ? "Готово" : "Змінити") {
+                        withAnimation(.spring()) {
+                            isEditing.toggle()
+                        }
                     }
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .transition(.opacity.combined(with: .scale))
                 }
-                .foregroundColor(.white)
             }
             .padding(.top, 50)
             .padding(.horizontal, 16)
             .padding(.bottom, 20)
+            .animation(.spring(), value: showEditButton)
         }
     }
     
-    /// Структура для окремого елемента міста (Картки)
     private struct CityCardRow: View {
         let city: String
         let index: Int
         let isEditing: Bool
-        let editingOffset: CGFloat
-        let paddingOffset: CGFloat
-        @ObservedObject var weatherVM: WeatherViewModel
         @ObservedObject var favoritesVM: FavoritesViewModel
+        let onSelect: () -> Void
 
         var body: some View {
-            HStack(spacing: 0) { // Головний HStack для керування позицією
-                
-                // 🛑 КНОПКА ВИДАЛЕННЯ: ЗАВЖДИ ЗНАХОДИТЬСЯ ЗЛІВА
+            HStack(spacing: 15) {
                 if isEditing {
                     Button(action: {
-                        withAnimation {
+                        withAnimation(.spring()) {
                             favoritesVM.removeCity(at: IndexSet(integer: index))
                         }
                     }) {
                         Image(systemName: "minus.circle.fill")
                             .foregroundColor(.red)
-                            .scaleEffect(1.2)
+                            .font(.title)
                     }
-                    // 🛑 ФІКС ПОЗИЦІЇ: Зміщуємо кнопку вліво на від'ємну величину
-                    .frame(width: editingOffset, alignment: .leading)
-                    .offset(x: 10) // Негативний зсув для зближення з карткою
+                    .transition(.move(edge: .leading).combined(with: .opacity))
                 }
 
-                // 🛑 ОСНОВНИЙ ВМІСТ КАРТКИ (Клікабельна область)
                 Button(action: {
                     if !isEditing {
-                        weatherVM.fetchWeather(city, nil, nil)
+                        onSelect()
                     }
                 }) {
                     HStack {
-                        Text(city).foregroundColor(.white)
-                            .lineLimit(1)
-                            .padding(.leading, isEditing ? 8 : 16) // ⬅️ КОМПЕНСАЦІЙНИЙ ВІДСТУП
+                        Text(city)
+                            .font(.title2)
+                            .fontWeight(.medium)
                         Spacer()
-                        Image(systemName: "cloud.sun").foregroundColor(.white.opacity(0.8))
-                            .padding(.trailing, 25)
+                        Image(systemName: "chevron.right")
+                            .font(.headline)
+                            .foregroundColor(.white.opacity(0.7))
                     }
-                    .padding(.vertical, 15)
-                    .buttonStyle(.plain)
-                    
-                    // 🛑 СТИЛІ КАРТКИ
+                    .padding()
+                    .frame(maxWidth: .infinity)
                     .background(Color.white.opacity(0.15))
-                    .cornerRadius(10)
-                    .shadow(color: .black.opacity(0.3), radius: 3, x: 0, y: 1)
+                    .cornerRadius(12)
                 }
-                
-                // 🛑 ЕФЕКТ ЗМІЩЕННЯ ВМІСТУ: Зміщуємо всю картку вправо
-                .offset(x: isEditing ? editingOffset : 0)
-                
-            } // Закриття HStack
-            .clipped() // Обрізаємо вміст
+                .buttonStyle(.plain)
+            }
         }
     }
 }
+

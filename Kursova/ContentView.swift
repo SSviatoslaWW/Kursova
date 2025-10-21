@@ -1,18 +1,34 @@
-// ContentView.swift
-
 import SwiftUI
 
 struct ContentView: View {
     @StateObject var weatherVM = WeatherViewModel()
     @StateObject var favoritesVM = FavoritesViewModel()
-    // Для можливості програмного перемикання Tab
+    
+    // Стан для програмного керування активною вкладкою
     @State private var selectedTab = 0
     
+    init() {
+        // Налаштовуємо зовнішній вигляд TabBar, щоб він був прозорим
+        // і гармоніював з градієнтним фоном.
+        let appearance = UITabBarAppearance()
+        appearance.configureWithTransparentBackground()
+        
+        // Встановлюємо колір іконок та тексту для звичайного стану
+        appearance.stackedLayoutAppearance.normal.iconColor = .white
+        appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.white]
+        
+        // Встановлюємо колір іконок та тексту для вибраного стану
+        appearance.stackedLayoutAppearance.selected.iconColor = .orange
+        appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor.orange]
+        
+        // Застосовуємо налаштування до стандартного вигляду TabBar
+        UITabBar.appearance().standardAppearance = appearance
+        UITabBar.appearance().scrollEdgeAppearance = appearance
+    }
+    
     var body: some View {
-        // 🛑 КРОК 1: ZStack для глобального градієнта (ФОН)
         ZStack {
-            
-            // 1. Глобальний Градієнт (На задньому плані)
+            // Глобальний градієнтний фон
             LinearGradient(
                 gradient: Gradient(colors: weatherVM.getBackgroundGradient()),
                 startPoint: .topLeading,
@@ -20,7 +36,7 @@ struct ContentView: View {
             )
             .ignoresSafeArea(.all)
             
-            // 2. TabView: розміщується поверх градієнта
+            // TabView для навігації
             TabView(selection: $selectedTab) {
                 
                 // Вкладка "Погода"
@@ -31,47 +47,23 @@ struct ContentView: View {
                     .tag(0)
                 
                 // Вкладка "Улюблені"
-                FavoritesView(favoritesVM: favoritesVM,
-                              // 🛑 ВИПРАВЛЕНО: Виклик функції як методу
-                              weatherVM: weatherVM.withTabSwitch(action: { selectedTab = 0 }))
-                    .tabItem {
-                        Label("Улюблені", systemImage: "list.star")
+                FavoritesView(
+                    favoritesVM: favoritesVM,
+                    weatherVM: weatherVM,
+                    // Передаємо замикання, яке буде викликано при виборі міста
+                    onCitySelect: { selectedCity in
+                        // Дія №1: Завантажуємо погоду
+                        weatherVM.fetchWeather(city: selectedCity, lat: nil, lon: nil)
+                        // Дія №2: Перемикаємо на вкладку погоди
+                        selectedTab = 0
                     }
-                    .tag(1)
+                )
+                .tabItem {
+                    Label("Улюблені", systemImage: "list.star")
+                }
+                .tag(1)
             }
-            // 🛑 ВИПРАВЛЕННЯ: Стилі TabView
-            .background(Color.clear)
-            .tint(.orange) // Змінено на жовтий для кращого контрасту
-            .toolbarBackground(.hidden, for: .tabBar)
+            .tint(.orange)
         }
-    }
-} // <--- СТРУКТУРА ЗАКРИТА ТУТ
-
-// MARK: - Допоміжне Розширення для Зручності Перемикання Табів
-
-extension WeatherViewModel {
-    
-    // 🛑 Ця функція модифікує оригінальний ViewModel (self)
-    func withTabSwitch(action: @escaping () -> Void) -> WeatherViewModel {
-        
-        // Зберігаємо оригінальну функцію з 3 аргументами
-        let originalFetchWeather = self.fetchWeather
-        
-        // 🛑 Створюємо функцію, яка приймає city, але має тип, сумісний з присвоєнням
-        let combinedFetch: (String?, Double?, Double?) -> Void = { city, lat, lon in
-            
-            // Викликаємо оригінальну функцію з 3 аргументами
-            originalFetchWeather(city, lat, lon)
-            
-            // Перемикаємо вкладку, якщо це був виклик із FavoritesView (city != nil і без координат)
-            if lat == nil && lon == nil && city != nil {
-                action()
-            }
-        }
-        
-        // 🛑 ПРИСВОЄННЯ: Ми присвоюємо нову функцію, яка має коректний тип
-        self.fetchWeather = combinedFetch
-        
-        return self
     }
 }

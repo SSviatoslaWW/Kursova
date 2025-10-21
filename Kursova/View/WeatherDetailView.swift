@@ -1,253 +1,228 @@
-// View/WeatherDetailView.swift
-
 import SwiftUI
 
-// MARK: - 🛑 ДОПОМІЖНЕ РОЗШИРЕННЯ: Функція для примусового закриття клавіатури
+// MARK: - Допоміжне розширення для закриття клавіатури
 extension UIApplication {
-    /// Примусово закриває екранну клавіатуру, викликаючи системну дію 'resignFirstResponder'.
     func endEditing() {
         sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
 
-// MARK: - СТИЛЬ КНОПКИ З ЕФЕКТОМ ГРАДІЄНТА
-/// Створює напівпрозору, заокруглену кнопку з анімацією натискання (scale down/fade).
+// MARK: - Стиль кнопки
 struct GradientPressableButtonStyle: ButtonStyle {
-    
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .padding(.horizontal, 10)
+            .padding(.horizontal, 12)
             .padding(.vertical, 8)
             .background(
-                LinearGradient( // Кастомний градієнтний фон
+                LinearGradient(
                     gradient: Gradient(colors: [
                         Color.white.opacity(0.3),
-                        Color.white.opacity(configuration.isPressed ? 0.7 : 0.5) // Збільшення прозорості при натисканні
+                        Color.white.opacity(configuration.isPressed ? 0.6 : 0.4)
                     ]),
                     startPoint: .leading,
                     endPoint: .trailing
                 )
             )
-            .cornerRadius(8)
-            .scaleEffect(configuration.isPressed ? 0.95 : 1.0) // Ефект стиснення
+            .cornerRadius(10)
+            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
             .foregroundColor(.white)
             .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
     }
 }
 
 
-// MARK: - ГОЛОВНА VIEW: WeatherDetailView
-
+// MARK: - Головна View
 struct WeatherDetailView: View {
     
     // MARK: - Властивості
     
     @ObservedObject var viewModel: WeatherViewModel
     @ObservedObject var favoritesVM: FavoritesViewModel
-    @State private var cityInput: String = "" // Стан для тексту в полі пошуку
+    @State private var cityInput: String = ""
     
-    // MARK: - Body View
+    // MARK: - Body
     
     var body: some View {
-        // 🛑 GeometryReader як кореневий елемент для визначення розмірів екрана
         GeometryReader { geometry in
             ZStack {
-                
-                // 1. Градієнт ФОНУ
+                // Фон, що заповнює весь екран
                 LinearGradient(
                     gradient: Gradient(colors: viewModel.getBackgroundGradient()),
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
-                .ignoresSafeArea(.all) // Заповнюємо весь екран, включаючи Status Bar
+                .ignoresSafeArea()
 
-                // 2. Основний Контейнер Контенту
+                // Основний контент
                 VStack(spacing: 15) {
                     
-                    Spacer().frame(height: 1) // Компенсаційний відступ
-                    
-                    // MARK: - 1. Панель Пошуку
+                    // Панель пошуку
                     SearchPanel(viewModel: viewModel, cityInput: $cityInput)
                     
-                    // MARK: - 2. Статус та Помилки
+                    // Індикатор завантаження або повідомлення про помилку
                     StatusAndErrorView(viewModel: viewModel)
                     
-                    // MARK: - 3. ОСНОВНИЙ ВЕРТИКАЛЬНИЙ СКРОЛ
+                    // Основний скрол з даними про погоду
                     WeatherScrollView(viewModel: viewModel, favoritesVM: favoritesVM, geometry: geometry)
                 }
-                .padding(.top, 10)
-                .foregroundColor(.white) // Загальний колір тексту
-                .shadow(color: .black.opacity(0.8), radius: 5, x: 0, y: 2) // Загальна тінь для контенту
-                .background(Color.clear)
-            } // Закриття ZStack
-        } // Закриття GeometryReader
-        
-        // MARK: - Системні Модифікатори
-        .onAppear {
-            // 🛑 АКТИВАЦІЯ CORE LOCATION при першому запуску
-            if viewModel.currentWeather == nil {
-                viewModel.locationManager.requestLocation()
+                .foregroundColor(.white)
+                .shadow(color: .black.opacity(0.4), radius: 4, y: 2)
             }
         }
-        // 🛑 ЗАКРИТТЯ КЛАВІАТУРИ ПРИ ТАПІ НА ФОН
-        .contentShape(Rectangle())
+        .onAppear {
+            // ❗️ ВИПРАВЛЕННЯ №1: Викликаємо новий метод з ViewModel
+            // для запиту геолокації при першому запуску.
+            if viewModel.currentWeather == nil {
+                viewModel.requestUserLocation()
+            }
+        }
+        .contentShape(Rectangle()) // Робить всю вільну область клікабельною
         .onTapGesture {
+            // Закриваємо клавіатуру при тапі на фон
             UIApplication.shared.endEditing()
         }
     }
     
-    // =============================================================
-    // MARK: - ВНУТРІШНІ СТРУКТУРИ UI (Subviews)
-    // =============================================================
-
-    /// 1. Структура для Панелі пошуку (TextField та Button)
+    // MARK: - Внутрішні компоненти UI (Subviews)
+    
     private struct SearchPanel: View {
         @ObservedObject var viewModel: WeatherViewModel
         @Binding var cityInput: String
         
         var body: some View {
             HStack {
-                TextField("Введіть назву міста", text: $cityInput) // Поле вводу
-                    .padding(8)
-                    .background(Color.white.opacity(0.3)).cornerRadius(8)
-                    .foregroundColor(.white).colorScheme(.dark)
+                TextField("Введіть назву міста...", text: $cityInput)
+                    .padding(10)
+                    .background(Color.white.opacity(0.35))
+                    .cornerRadius(10)
+                    .foregroundColor(.white)
                     .tint(.white) // Колір курсора
                 
                 Button("Пошук") {
                     if !cityInput.isEmpty {
-                        viewModel.fetchWeather(cityInput, nil, nil) // Виклик пошуку за містом
-                        UIApplication.shared.endEditing() // Закриття клавіатури
+                        // ❗️ ВИПРАВЛЕННЯ №2: Додано мітки параметрів (city:, lat:, lon:)
+                        viewModel.fetchWeather(city: cityInput, lat: nil, lon: nil)
+                        UIApplication.shared.endEditing()
+                        cityInput = ""
                     }
                 }
                 .buttonStyle(GradientPressableButtonStyle())
             }
             .padding(.horizontal)
+            .padding(.top, 10)
         }
     }
     
-    /// 2. Структура для відображення стану завантаження та помилок
     private struct StatusAndErrorView: View {
         @ObservedObject var viewModel: WeatherViewModel
         
         var body: some View {
             if viewModel.isLoading {
-                ProgressView("Завантаження погоди...").foregroundColor(.white)
+                ProgressView("Оновлення даних...")
+                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                    .padding(.vertical, 10)
             } else if let errorMsg = viewModel.errorMessage {
-                // Вивід помилки (наприклад, "Місто не знайдено")
-                Text("❌ \(errorMsg)").foregroundColor(.red).padding()
+                Text("⚠️ \(errorMsg)")
+                    .foregroundColor(.yellow)
+                    .padding()
+                    .background(Color.black.opacity(0.3))
+                    .cornerRadius(10)
             }
         }
     }
     
-    /// 3. Головний скрол для відображення поточної погоди та прогнозів
     private struct WeatherScrollView: View {
         @ObservedObject var viewModel: WeatherViewModel
         @ObservedObject var favoritesVM: FavoritesViewModel
-        let geometry: GeometryProxy // Доступ до розмірів для розрахунку висоти
+        let geometry: GeometryProxy
         
         var body: some View {
             ScrollView(.vertical, showsIndicators: false) {
                 
-                VStack { // ⬅️ Внутрішній VStack для контенту
-                    if let weather = viewModel.currentWeather {
-                        VStack(spacing: 10) {
-                            
-                            // 3.1. Основні дані (Назва, Температура, Кнопка Улюблене)
-                            MainWeatherInfo(weather: weather, favoritesVM: favoritesVM, viewModel: viewModel)
-                            
-                            // 3.2. Горизонтальний Прогноз (24 год)
-                            HorizontalForecastSection(viewModel: viewModel)
-                            
-                            // 3.3. 5-денний Прогноз (Кнопки)
-                            DailyForecastSection(viewModel: viewModel)
-                            
-                        }
-                        .padding(.horizontal)
-                        .padding(.bottom, 20)
-                        
+                if let weather = viewModel.currentWeather {
+                    VStack(spacing: 20) {
+                        MainWeatherInfo(weather: weather, favoritesVM: favoritesVM)
+                        HorizontalForecastSection(viewModel: viewModel)
+                        DailyForecastSection(viewModel: viewModel)
                     }
+                    .padding(.horizontal)
+                    .padding(.bottom, 30)
                     
+                } else if !viewModel.isLoading && viewModel.errorMessage == nil {
                     // Заглушка, якщо даних немає
-                    else if !viewModel.isLoading && viewModel.errorMessage == nil {
-                        VStack {
-                            Spacer()
-                            Text("Введіть місто для перегляду погоди").foregroundColor(.white.opacity(0.8))
-                            Spacer()
-                        }
-                    }
-                    
-                } // Закриття Внутрішнього VStack
-                .frame(minHeight: geometry.size.height - 100) // ⬅️ Розтягування вмісту на весь екран
-                .scrollBounceBehavior(.basedOnSize) // Умовне керування відскоком
-                
-            } // Закриття ScrollView
+                    Text("Введіть назву міста, щоб побачити погоду.")
+                        .font(.headline)
+                        .foregroundColor(.white.opacity(0.8))
+                        .frame(height: geometry.size.height / 2)
+                }
+            }
+            .scrollBounceBehavior(.basedOnSize)
         }
     }
     
-    /// 4. Основна інформаційна картка (Поточна температура)
     private struct MainWeatherInfo: View {
         let weather: CurrentWeatherResponse
         @ObservedObject var favoritesVM: FavoritesViewModel
-        @ObservedObject var viewModel: WeatherViewModel
         
         var body: some View {
-            VStack(spacing: 10) {
-                Text(weather.name).font(.largeTitle).bold()
+            VStack(spacing: 8) {
+                Text(weather.name)
+                    .font(.largeTitle).bold()
                 
-                HStack {
-                    if let iconURL = weather.weather.first?.iconURL {
-                        AsyncImage(url: iconURL) { phase in
-                            if let image = phase.image { image.resizable().frame(width: 100, height: 100) }
-                            else { ProgressView().frame(width: 100, height: 100).tint(.white) }
-                        }
-                    }
-                    Text(weather.main.temperatureString).font(.system(size: 80)).fontWeight(.light)
+                Text(weather.main.temperatureString)
+                    .font(.system(size: 80, weight: .thin))
+                
+                Text(weather.weather.first?.description.capitalized ?? "")
+                    .font(.title3).fontWeight(.medium)
+                
+                Button {
+                    favoritesVM.addCity(weather.name)
+                } label: {
+                    Label("Додати до Улюблених", systemImage: "star")
                 }
-                
-                Text(weather.weather.first?.description.capitalized ?? "Невідомо").font(.title3)
-                
-                Button { favoritesVM.addCity(weather.name) } label: { Label("Додати до Улюблених", systemImage: "star.fill") }
-                    .buttonStyle(GradientPressableButtonStyle())
-                    .padding(.top)
+                .buttonStyle(GradientPressableButtonStyle())
+                .padding(.top, 10)
             }
+            .padding(.top, 20)
         }
     }
     
-    /// 5. Горизонтальний скрол (Погодинний прогноз)
     private struct HorizontalForecastSection: View {
         @ObservedObject var viewModel: WeatherViewModel
         
         var body: some View {
-            VStack(alignment: .leading, spacing: 5) {
-                Text("Погодинний Прогноз (24 год)").font(.headline)
-                    .frame(maxWidth: .infinity, alignment: .leading).padding(.top, 20)
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Погодинний прогноз")
+                    .font(.title3).bold()
+                    .padding(.leading)
 
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 12) {
+                    HStack(spacing: 15) {
                         ForEach(viewModel.forecastItems, id: \.dt) { item in
                             ForecastItemView(item: item)
                         }
                     }
+                    .padding(.horizontal)
                 }
-                .frame(height: 140) // Фіксована висота скролу
-                .scrollBounceBehavior(.basedOnSize)
             }
+            .padding(.top, 20)
         }
     }
     
-    /// 6. Секція 5-денного прогнозу (Кнопки)
     private struct DailyForecastSection: View {
         @ObservedObject var viewModel: WeatherViewModel
         
         var body: some View {
-            VStack(alignment: .leading, spacing: 5) {
-                Text("Прогноз на 5 днів").font(.title2).bold()
-                    .frame(maxWidth: .infinity, alignment: .leading).padding(.top, 20)
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Прогноз на 5 днів")
+                    .font(.title3).bold()
+                    .padding(.leading)
 
                 ForEach(viewModel.dailyForecast, id: \.dt) { item in
-                    DailyForecastItemView(item: item, viewModel: viewModel) // ⬅️ Кнопки деталізації
+                    DailyForecastItemView(item: item, viewModel: viewModel)
                 }
             }
+            .padding(.top, 20)
         }
     }
 }

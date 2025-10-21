@@ -4,43 +4,33 @@ import Foundation
 
 class WeatherService {
     
-    // ⚠️ ПРИМІТКА: Потрібні файли Constants.swift та APIError.swift
-    
     // MARK: - Core Fetch Method
     
-    /// Універсальна функція для виконання мережевих запитів та декодування JSON.
     private func fetchData<T: Decodable>(endpoint: String, queryItems: [URLQueryItem], completion: @escaping (Result<T, APIError>) -> Void) {
         
-        // 1. Створення компонента URL
         var components = URLComponents(string: Constants.baseURL + endpoint)
         
-        // 2. 🔑 Базові параметри, необхідні для кожного запиту
         var baseQueryItems = [
             URLQueryItem(name: "appid", value: Constants.apiKey),     // 🔑 API ключ
             URLQueryItem(name: "units", value: Constants.units),      // 🌡️ Метричні одиниці (°C)
             URLQueryItem(name: "lang", value: "uk")                   // 🌐 Мова відповіді (Українська)
         ]
         
-        // 3. Додаємо специфічні параметри (координати або назву міста)
         baseQueryItems.append(contentsOf: queryItems)
         components?.queryItems = baseQueryItems
         
-        // 4. Валідація URL
         guard let url = components?.url else {
-            completion(.failure(.invalidURL)) // Помилка: Недійсний URL
+            completion(.failure(.invalidURL))
             return
         }
         
-        // 5. Запуск мережевого завдання
         URLSession.shared.dataTask(with: url) { data, response, error in
             
-            // 6. Обробка мережевої помилки
             if let error = error {
                 completion(.failure(.other(error.localizedDescription)))
                 return
             }
             
-            // 7. Обробка HTTP статус-кодів
             if let httpResponse = response as? HTTPURLResponse {
                 let statusCode = httpResponse.statusCode
                 
@@ -48,20 +38,19 @@ class WeatherService {
                     completion(.failure(.cityNotFound)) // 🛑 Помилка: Місто не знайдено
                     return
                 } else if statusCode != 200 {
-                    completion(.failure(.other("HTTP Error: \(statusCode)"))) // Обробка інших HTTP помилок.
+                    completion(.failure(.other("HTTP Error: \(statusCode)")))
                     return
                 }
             }
             
-            // 8. Перевірка наявності даних
             guard let data = data else {
                 completion(.failure(.noData))
                 return
             }
             
-            // 9. Декодування JSON
+            
             do {
-                let decodedObject = try JSONDecoder().decode(T.self, from: data) // Спроба перетворити JSON на структуру T.
+                let decodedObject = try JSONDecoder().decode(T.self, from: data)
                 
                 // ДІАГНОСТИКА УСПІХУ (Виводиться у консоль)
                 print("✅ DECODE SUCCESS: Successfully decoded object of type \(T.self)")

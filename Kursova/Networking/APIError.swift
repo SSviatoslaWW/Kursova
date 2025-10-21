@@ -1,13 +1,7 @@
 // Networking/APIError.swift
 
-import Foundation // Обов'язковий імпорт для протоколів Error та LocalizedError
+import Foundation
 
-/// Перерахування, що визначає всі можливі помилки, які можуть виникнути під час роботи з API.
-///
-/// - Використовує протоколи:
-///   - Error: Базовий протокол помилок у Swift.
-///   - LocalizedError: Дозволяє надати локалізований опис помилки (для UI).
-///   - Equatable: Дозволяє порівнювати два об'єкти APIError (необхідно для логіки ViewModel).
 enum APIError: Error, LocalizedError, Equatable {
     
     // MARK: - Випадки Помилок (Cases)
@@ -23,13 +17,11 @@ enum APIError: Error, LocalizedError, Equatable {
     /// Явна реалізація оператора рівності (==) для порівняння випадків з асоційованими значеннями.
     static func == (lhs: APIError, rhs: APIError) -> Bool {
         switch (lhs, rhs) {
-            // Порівняння випадків без асоційованих значень
         case (.invalidURL, .invalidURL), (.cityNotFound, .cityNotFound), (.decodingError, .decodingError), (.noData, .noData):
             return true
             // Порівняння випадків з асоційованим значенням (порівнюємо їхні рядки)
         case let (.other(l), .other(r)):
             return l == r
-            // Усі інші комбінації не рівні
         default:
             return false
         }

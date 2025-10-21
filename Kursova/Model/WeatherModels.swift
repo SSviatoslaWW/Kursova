@@ -9,20 +9,20 @@ import Foundation
 // Допоміжні структури для декодування вкладених об'єктів JSON
 
 struct Coordinates: Decodable {
-    let lon: Double // Довгота (longitude)
-    let lat: Double // Широта (latitude)
+    let lon: Double // Довгота
+    let lat: Double // Широта
 }
 struct Wind: Decodable {
-    let speed: Double? // Швидкість вітру (м/с)
+    let speed: Double? // Швидкість вітру
     let deg: Int?      // Напрямок вітру (градуси)
 }
 struct Clouds: Decodable {
-    let all: Int // Хмарність у відсотках (0-100%)
+    let all: Int // Хмарність у відсотках
 }
 struct SystemInfo: Decodable {
-    let country: String // Код країни (наприклад, UA)
-    let sunrise: Int    // Час сходу сонця (Unix timestamp)
-    let sunset: Int     // Час заходу сонця (Unix timestamp)
+    let country: String // Код країни
+    let sunrise: Int    // Час сходу сонця
+    let sunset: Int     // Час заходу сонця
 }
 
 // Головна структура для відповіді поточної погоди
@@ -63,7 +63,7 @@ struct MainWeather: Decodable {
     }
 }
 
-// Структура для погодних умов (WeatherCondition)
+// Структура для погодних умов
 struct WeatherCondition: Decodable {
     let main: String        // Основна група (Clear, Rain, Snow) - для логіки градієнта
     let description: String // Детальний опис
@@ -71,7 +71,6 @@ struct WeatherCondition: Decodable {
     
     // Обчислювана властивість для формування URL іконки
     var iconURL: URL? {
-        // Примітка: Потрібен доступ до Constants.iconURL
         Constants.iconURL(iconCode: icon)
     }
 }
