@@ -11,10 +11,8 @@ struct Constants {
     
     static let units = "metric"
     
-    // MARK: - Utility Functions
-    
+    // Формуємо повний URL для завантаження іконки
     static func iconURL(iconCode: String) -> URL? {
-        // Формуємо повний URL для завантаження іконки
         return URL(string: "https://openweathermap.org/img/wn/\(iconCode)@2x.png")
     }
 }

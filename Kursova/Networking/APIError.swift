@@ -4,30 +4,23 @@ import Foundation
 
 enum APIError: Error, LocalizedError, Equatable {
     
-    // MARK: - Випадки Помилок (Cases)
-    
     case invalidURL     // Помилка при формуванні URL.
     case cityNotFound   // Код 404: Місто не знайдено в базі даних API.
     case decodingError  // Помилка парсингу JSON (структура моделі не збігається з даними).
     case noData         // Дані не були отримані (наприклад, відповідь сервера була порожньою).
     case other(String)  // Інша невідома мережева помилка (з асоційованим повідомленням).
     
-    // MARK: - Реалізація Equatable (Для порівняння)
     
-    /// Явна реалізація оператора рівності (==) для порівняння випадків з асоційованими значеннями.
     static func == (lhs: APIError, rhs: APIError) -> Bool {
         switch (lhs, rhs) {
         case (.invalidURL, .invalidURL), (.cityNotFound, .cityNotFound), (.decodingError, .decodingError), (.noData, .noData):
             return true
-            // Порівняння випадків з асоційованим значенням (порівнюємо їхні рядки)
         case let (.other(l), .other(r)):
             return l == r
         default:
             return false
         }
     }
-    
-    // MARK: - Локалізований Опис (Localized Description)
     
     /// Повертає опис помилки, зручний для відображення користувачу.
     var errorDescription: String? {

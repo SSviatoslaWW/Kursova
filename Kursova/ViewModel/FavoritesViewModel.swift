@@ -4,24 +4,18 @@ import Combine
 /// Manages the list of favorite cities and their persistence.
 class FavoritesViewModel: ObservableObject {
     
-    // MARK: - Published Properties
-    
-    /// The array of city names displayed in the view.
-    /// `didSet` is used to automatically update other properties and save data when this array changes.
+    //масив назв міст
     @Published var favoriteCities: [String] = [] {
         didSet {
-            // Automatically update the button's visibility state.
+            //оновлення стану видимості кнопки
             shouldShowEditButton = !favoriteCities.isEmpty
-            // Save changes to local storage.
+            // збереження змін
             saveFavorites()
         }
     }
     
-    /// A pre-calculated boolean that determines if the "Edit" button should be visible.
-    /// The View will read this value directly. `private(set)` ensures only this ViewModel can change it.
+    //Відповідає за видимість кнопки змінити
     @Published private(set) var shouldShowEditButton: Bool = false
-    
-    // MARK: - Properties
     
     /// The key used to store the list in UserDefaults.
     private let key = "FavoriteCitiesList"
@@ -34,9 +28,9 @@ class FavoritesViewModel: ObservableObject {
     
     // MARK: - Public Methods
     
-    /// Adds a new city to the list if it's not empty and not a duplicate.
-    /// - Parameter city: The name of the city to add.
+    //додавання міста в список
     func addCity(_ city: String) {
+        //очищення назви від зайвих пробіліів
         let normalizedCity = city.trimmingCharacters(in: .whitespacesAndNewlines)
         
         if !normalizedCity.isEmpty && !favoriteCities.contains(normalizedCity) {
@@ -44,18 +38,15 @@ class FavoritesViewModel: ObservableObject {
         }
     }
     
-    /// Removes cities from the list at specified indices.
-    /// - Parameter offsets: A set of indices to remove.
+    //Видалення міста зі списку
     func removeCity(at offsets: IndexSet) {
         favoriteCities.remove(atOffsets: offsets) // This will trigger `didSet`.
     }
-
-    // MARK: - Private Persistence Methods
     
-    /// Loads the list of favorite cities from UserDefaults.
+    /// Завантаження списку зі сховища
     private func loadFavorites() {
         if let savedCities = UserDefaults.standard.stringArray(forKey: key) {
-            favoriteCities = savedCities // This will trigger `didSet` on initial load.
+            favoriteCities = savedCities // викличе didset при першому завантажені
         }
     }
     

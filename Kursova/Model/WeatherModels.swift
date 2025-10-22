@@ -6,8 +6,6 @@ import Foundation
 // MARK: - 1. СТРУКТУРИ ДЛЯ ПОТОЧНОЇ ПОГОДИ (API /weather)
 // =================================================================
 
-// Допоміжні структури для декодування вкладених об'єктів JSON
-
 struct Coordinates: Decodable {
     let lon: Double // Довгота
     let lat: Double // Широта
@@ -23,23 +21,6 @@ struct SystemInfo: Decodable {
     let country: String // Код країни
     let sunrise: Int    // Час сходу сонця
     let sunset: Int     // Час заходу сонця
-}
-
-// Головна структура для відповіді поточної погоди
-struct CurrentWeatherResponse: Decodable {
-    let coord: Coordinates
-    let weather: [WeatherCondition] // Масив основних умов (опис, іконка)
-    let base: String
-    let main: MainWeather       // Об'єкт з температурою та тиском
-    let visibility: Int?        // Видимість (метри)
-    let wind: Wind?
-    let clouds: Clouds?
-    let dt: Int                 // Час оновлення даних (Unix timestamp)
-    let sys: SystemInfo
-    let timezone: Int           // Зсув від UTC у секундах
-    let id: Int
-    let name: String            // Назва міста, повернута API
-    let cod: Int
 }
 
 // Структура для основних параметрів (Main)
@@ -62,6 +43,25 @@ struct MainWeather: Decodable {
         return String(format: "%.0f°C", temp)
     }
 }
+
+
+// Головна структура для відповіді поточної погоди
+struct CurrentWeatherResponse: Decodable {
+    let coord: Coordinates
+    let weather: [WeatherCondition] // Масив основних умов (опис, іконка)
+    let base: String
+    let main: MainWeather       // Об'єкт з температурою та тиском
+    let visibility: Int?        // Видимість (метри)
+    let wind: Wind?
+    let clouds: Clouds?
+    let dt: Int                 // Час оновлення даних (Unix timestamp)
+    let sys: SystemInfo
+    let timezone: Int           // Зсув від UTC у секундах
+    let id: Int
+    let name: String            // Назва міста, повернута API
+    let cod: Int
+}
+
 
 // Структура для погодних умов
 struct WeatherCondition: Decodable {
@@ -95,7 +95,7 @@ struct ForecastItem: Decodable {
         Date(timeIntervalSince1970: TimeInterval(dt))
     }
     
-    // 🛑 fullDayName: Повна назва дня (використовується у модальному вікні)
+    //Повна назва дня (використовується у модальному вікні)
     var fullDayName: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "EEEE" // Формат: Понеділок
@@ -109,8 +109,6 @@ struct ForecastItem: Decodable {
         formatter.dateFormat = "EEE" // Формат: Пн, Вт
         formatter.locale = Locale(identifier: "uk_UA")
         
-        let shortName = formatter.string(from: date)
-        // Мануально робимо першу букву великою, щоб уникнути конфлікту локалі.
-        return shortName.prefix(1).uppercased() + shortName.dropFirst()
+        return formatter.string(from: date).capitalized
     }
 }

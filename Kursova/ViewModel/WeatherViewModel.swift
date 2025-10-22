@@ -10,18 +10,18 @@ class WeatherViewModel: NSObject, ObservableObject {
     private let DEFAULT_CITY = "Lviv"
     
     @Published var currentCity: String
-    @Published var currentWeather: CurrentWeatherResponse?
-    @Published var forecastItems: [ForecastItem] = []
-    @Published var dailyForecast: [ForecastItem] = []
-    @Published var groupedDailyForecast: [Date: [ForecastItem]] = [:]
-    @Published var isLoading = false
-    @Published var errorMessage: String?
+    @Published var currentWeather: CurrentWeatherResponse? //Поточна погода
+    @Published var forecastItems: [ForecastItem] = [] //Погода на найбличі годин
+    @Published var dailyForecast: [ForecastItem] = [] //Прогноз на 5 днів для кнопок
+    @Published var groupedDailyForecast: [Date: [ForecastItem]] = [:] //детальний прогноз по дням для модалки
+    @Published var isLoading = false // перевірка чи йде завантаження
+    @Published var errorMessage: String? //текст помилки для відображеня
     
     private let service = WeatherService()
     public var locationManager: LocationManager
     
-    private var isInitialLoad = true
-    private var isUserSearch = false
+    private var isInitialLoad = true //перевірка чи перший запуск додатку
+    private var isUserSearch = false // перевірка чи користувач ввів місто
     
     override init() {
         self.currentCity = DEFAULT_CITY
@@ -29,8 +29,7 @@ class WeatherViewModel: NSObject, ObservableObject {
         super.init()
     }
     
-    // MARK: - Public Methods
-    
+    //пошук користувацьої локації
     func requestUserLocation() {
         // Запобігаємо повторному запиту, якщо погода вже завантажена
         guard isInitialLoad else { return }
@@ -53,9 +52,8 @@ class WeatherViewModel: NSObject, ObservableObject {
         }
     }
     
-    // ❗️ 1. Перетворено lazy var на звичайний метод `func`. Це виправляє помилки.
+    // пошук погоди за координатами та містом
     func fetchWeather(city: String?, lat: Double?, lon: Double?) {
-        // ❗️ 2. Оскільки це метод, [weak self] та guard let self більше не потрібні всередині
         self.isUserSearch = (city != self.DEFAULT_CITY && city != nil && lat == nil && lon == nil)
         
         self.isLoading = true
@@ -75,6 +73,7 @@ class WeatherViewModel: NSObject, ObservableObject {
             return [Color(red: 0.1, green: 0.1, blue: 0.2), Color(red: 0.3, green: 0.3, blue: 0.4)]
         }
         let mainCondition = weatherData.weather.first?.main ?? "Default"
+        //поточна температура
         let temp = weatherData.main.temp
         
         switch mainCondition {
@@ -95,7 +94,6 @@ class WeatherViewModel: NSObject, ObservableObject {
         }
     }
     
-    // MARK: - Private Fetching Methods
     
     private func fetchWeatherAndForecast(lat: Double, lon: Double) {
         service.fetchCurrentWeather(lat: lat, lon: lon) { [weak self] currentResult in
