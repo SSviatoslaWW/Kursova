@@ -51,7 +51,7 @@ class WeatherService {
                 let decodedObject = try JSONDecoder().decode(T.self, from: data)
                 
                 completion(.success(decodedObject)) // Успіх
-            } catch let decodeError {
+            } catch  {
                 completion(.failure(.decodingError))
             }
             

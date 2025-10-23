@@ -1,44 +1,47 @@
-// DailyForecastItemView.swift
+// Картки 5 денного прогнозу кнопки
 
 import SwiftUI
 
 struct DailyForecastItemView: View {
     
-    // MARK: - Властивості та Стан
+    let item: ForecastItem //Одиничний об'єкт прогнозу, що представляє один день.
     
-    let item: ForecastItem // ➡️ Одиничний об'єкт прогнозу, що представляє один день.
+    @ObservedObject var viewModel: WeatherViewModel // Доступ до загального стану для отримання детального прогнозу на день
     
-    @ObservedObject var viewModel: WeatherViewModel // ➡️ Доступ до загального стану (температура, градієнт) та згрупованих даних.
-    
-    @State private var showingDetail = false // ➡️ Стан, що контролює видимість модального вікна (sheet).
+    @State private var showingDetail = false //Стан, що контролює видимість модального вікна (sheet).
     
     var body: some View {
-        // 🛑 ОБГОРТАЄМО УСЕ В КНОПКУ
+        // ОБГОРТАЄМО УСЕ В КНОПКУ
         Button(action: {
-            showingDetail = true // ⬅️ Активуємо модальне вікно при натисканні.
+            showingDetail = true
         }) {
-            // MARK: - Вміст Картки (HStack)
             HStack {
                 
-                // 1. День тижня (використовуємо скорочену назву)
-                Text(item.dayOfWeekShort) // ⬅️ Виводить скорочену назву (Пн, Вт).
-                    .font(.title3).bold()
-                    .frame(width: 80, alignment: .leading)
+                VStack(alignment: .leading, spacing: 2) {
+                    //День тижня (скорочена назва)
+                    Text(item.dayOfWeekShort)
+                        .font(.title3).bold()
+                    
+                    Text(item.shortDateString) 
+                        .font(.body)
+                        .foregroundColor(.white.opacity(0.8))
+                }
+                .frame(width: 90, alignment: .leading)
                 
-                Spacer() // ➡️ Розділяє день та іконку.
+                Spacer()
                 
-                // 2. Іконка (завантажується з API)
+                //Іконка (завантажується з API)
                 if let url = item.weather.first?.iconURL {
                     AsyncImage(url: url) { phase in
                         if let image = phase.image {
                             image.resizable().frame(width: 50, height: 50)
                         } else {
-                            ProgressView().frame(width: 50, height: 50).tint(.white) // Заглушка при завантаженні
+                            ProgressView().frame(width: 50, height: 50).tint(.white)
                         }
                     }
                 }
                 
-                Spacer() // ➡️ Розділяє іконку та температуру.
+                Spacer()
                 
                 // 3. Температура
                 Text(item.main.temperatureString)
@@ -46,13 +49,9 @@ struct DailyForecastItemView: View {
                     .bold()
                     .frame(width: 60, alignment: .trailing)
             }
-            
-            // 🛑 Встановлюємо колір вмісту білим для контрасту
             .foregroundColor(.white)
-            
-            // 🛑 КЛЮЧОВЕ ВИПРАВЛЕННЯ КЛІКАБЕЛЬНОСТІ: Стилі всередині Button
             // Це гарантує, що вся область, включаючи фон, реагує на натискання.
-            .frame(maxWidth: .infinity) // ⬅️ Розтягує вміст на всю ширину.
+            //.frame(maxWidth: .infinity) // ⬅️ Розтягує вміст на всю ширину.
             .padding(.vertical, 10)
             .padding(.horizontal, 20)
             .background(Color.white.opacity(0.15)) // Напівпрозорий фон картки.
@@ -62,14 +61,13 @@ struct DailyForecastItemView: View {
         } // Закриття Button
         
         
-        // MARK: - Модальне Вікно (Детальний Прогноз)
-        
+        //Модальне Вікно (Детальний Прогноз)
         .sheet(isPresented: $showingDetail) {
             
             // 1. Отримання ключа дати (початок дня)
             let dateKey = Calendar.current.startOfDay(for: item.date)
             
-            // 2. Отримання згрупованих даних для вибраного дня (усі 3-годинні записи)
+            // 2. Отримання згрупованих даних для вибраного дня
             let itemsForDay = viewModel.groupedDailyForecast[dateKey] ?? []
             
             // 3. Ініціалізація детальної View

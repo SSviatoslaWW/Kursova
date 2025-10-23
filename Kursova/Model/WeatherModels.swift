@@ -103,7 +103,7 @@ struct ForecastItem: Decodable {
         return formatter.string(from: date).capitalized
     }
 
-    // 🛑 dayOfWeekShort: Скорочена назва дня (використовується для карток 5-денного прогнозу)
+    //Скорочена назва дня (використовується для карток 5-денного прогнозу)
     var dayOfWeekShort: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "EEE" // Формат: Пн, Вт
@@ -111,4 +111,12 @@ struct ForecastItem: Decodable {
         
         return formatter.string(from: date).capitalized
     }
+    
+        //Скорочена дата 24 жовт
+    var shortDateString: String {
+           let formatter = DateFormatter()
+           formatter.dateFormat = "d MMM"
+           formatter.locale = Locale(identifier: "uk_UA")
+           return formatter.string(from: date)
+       }
 }

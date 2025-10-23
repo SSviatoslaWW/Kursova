@@ -6,7 +6,6 @@ import CoreLocation
 
 class WeatherViewModel: NSObject, ObservableObject {
 
-    // MARK: - Constants & Published Properties
     private let DEFAULT_CITY = "Lviv"
     
     @Published var currentCity: String
@@ -94,19 +93,22 @@ class WeatherViewModel: NSObject, ObservableObject {
         }
     }
     
-    
+    //Викликається коли є відомі координати
     private func fetchWeatherAndForecast(lat: Double, lon: Double) {
         service.fetchCurrentWeather(lat: lat, lon: lon) { [weak self] currentResult in
             self?.handleFetchResults(currentResult: currentResult, isLocationAttempt: true, isSystemReserve: false, lat: lat, lon: lon, city: nil)
         }
     }
     
+    //викликається коли  відоме міісто
     private func fetchWeatherAndForecast(city: String, isSystemReserve: Bool) {
         service.fetchCurrentWeather(city: city) { [weak self] currentResult in
             self?.handleFetchResults(currentResult: currentResult, isLocationAttempt: false, isSystemReserve: isSystemReserve, lat: nil, lon: nil, city: city)
         }
     }
-
+    
+    
+    //обробка даних отриманих від API для поточної погоди
     private func handleFetchResults(currentResult: Result<CurrentWeatherResponse, APIError>, isLocationAttempt: Bool, isSystemReserve: Bool, lat: Double?, lon: Double?, city: String?) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
@@ -134,6 +136,7 @@ class WeatherViewModel: NSObject, ObservableObject {
         }
     }
     
+    // відповідає за прогнозування погоди на 5 деів
     private func fetchForecast(city: String?, lat: Double?, lon: Double?) {
         if let lat = lat, let lon = lon {
             service.fetchForecast(lat: lat, lon: lon) { [weak self] forecastResult in
@@ -146,6 +149,7 @@ class WeatherViewModel: NSObject, ObservableObject {
         }
     }
     
+    //Обробляє прогноз на кілька днів
     private func handleForecastResult(_ result: Result<ForecastResponse, APIError>) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
@@ -164,9 +168,9 @@ class WeatherViewModel: NSObject, ObservableObject {
     
     private func filterDailyForecast(_ list: [ForecastItem]) -> [ForecastItem] {
         var filteredItems: [ForecastItem] = []
-        var seenDates: Set<String> = []
-        let calendar = Calendar.current
-        let dateFormatter = DateFormatter()
+        var seenDates: Set<String> = [] //збереження дат які ми вже додали
+        let calendar = Calendar.current //календар для роботи з датами
+        let dateFormatter = DateFormatter() //перетворення дати в рядок
         dateFormatter.dateFormat = "yyyy-MM-dd"
         for item in list {
             let date = item.date
@@ -180,6 +184,7 @@ class WeatherViewModel: NSObject, ObservableObject {
         return filteredItems
     }
     
+    //групує детальний прогноз погоди для модалки
     private func groupForecastByDay(_ list: [ForecastItem]) -> [Date: [ForecastItem]] {
         let calendar = Calendar.current
         let grouped = Dictionary(grouping: list) { item in

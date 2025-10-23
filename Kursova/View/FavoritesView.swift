@@ -1,15 +1,13 @@
 import SwiftUI
 
 struct FavoritesView: View {
-    
-    // MARK: - Властивості
-    
     @ObservedObject var favoritesVM: FavoritesViewModel
     @ObservedObject var weatherVM: WeatherViewModel
     
     // Приймає замикання з ContentView для обробки натискання на місто
     let onCitySelect: (String) -> Void
     
+    //перемикач режипу редагування
     @State private var isEditing: Bool = false
     
     // MARK: - Body
@@ -59,13 +57,11 @@ struct FavoritesView: View {
             }
             .foregroundColor(.white)
         }
-        // ❗️ ВИПРАВЛЕНО: Використано новий синтаксис .onChange для iOS 17+
-        // Ми отримуємо старе і нове значення, але використовуємо тільки нове (`newValue`).
+        // Ми отримуємо старе і нове значення, але використовуємо тільки нове
         .onChange(of: favoritesVM.favoriteCities) { oldValue, newValue in
-            // Якщо новий масив порожній і ми все ще в режимі редагування...
+            // Якщо новий масив порожній і ми все ще в режимі редагування
             if newValue.isEmpty && isEditing {
                 withAnimation(.spring()) {
-                    // ...автоматично виходимо з режиму редагування.
                     isEditing = false
                 }
             }
@@ -154,7 +150,7 @@ struct FavoritesView: View {
                     .background(Color.white.opacity(0.15))
                     .cornerRadius(12)
                 }
-                .buttonStyle(.plain)
+                //.buttonStyle(.plain)
             }
         }
     }

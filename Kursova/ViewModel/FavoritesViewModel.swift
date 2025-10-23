@@ -50,8 +50,6 @@ class FavoritesViewModel: ObservableObject {
         }
     }
     
-    /// Saves the current list of favorite cities to UserDefaults.
-    /// This is now called automatically from the `didSet` of `favoriteCities`.
     private func saveFavorites() {
         UserDefaults.standard.set(favoriteCities, forKey: key)
     }

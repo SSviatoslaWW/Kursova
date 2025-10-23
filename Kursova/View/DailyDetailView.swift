@@ -1,4 +1,4 @@
-// DailyDetailView.swift
+// діалогове вікно
 
 import SwiftUI
 
@@ -10,7 +10,7 @@ struct DailyDetailView: View {
     
     // MARK: - Обчислювані Властивості та Логіка
     
-    /// Форматує дату першого елемента прогнозу (наприклад, "17 жовтня 2025").
+    /// Форматує дату елемента прогнозу (наприклад, "17 жовтня 2025").
     private var fullDateString: String {
         guard let firstItem = dayForecast.first else { return "" }
         let formatter = DateFormatter()
@@ -58,7 +58,7 @@ struct DailyDetailView: View {
             
             VStack(spacing: 0) {
                 
-                // 🛑 1. ВЕРХНЯ ПАНЕЛЬ
+                // ВЕРХНЯ ПАНЕЛЬ
                 CustomHeaderView(dayName: dayName, fullDateString: fullDateString, dismiss: dismiss)
                 
                 // 2. Скрол для всіх погодинних карток
@@ -69,7 +69,6 @@ struct DailyDetailView: View {
                         }
                     }
                     .padding()
-                    .padding(.bottom, 30) // Відступ від нижнього краю
                 }
                 .scrollBounceBehavior(.basedOnSize) // Контроль відскоку
             }
@@ -77,8 +76,8 @@ struct DailyDetailView: View {
             .shadow(color: .black.opacity(0.4), radius: 3, x: 0, y: 1)
             
         } // Закриття ZStack
-        .presentationDetents([.large]) // Повноекранний режим
-        .presentationDragIndicator(.hidden) // Приховуємо індикатор
+        //.presentationDetents([.large]) // Повноекранний режим
+        //.presentationDragIndicator(.hidden) // Приховуємо індикатор
     }
     
     // =============================================================
@@ -94,16 +93,16 @@ struct DailyDetailView: View {
         var body: some View {
             VStack(spacing: 5) {
                 
-                // КНОПКА ЗАКРИТТЯ (Правий кут)
+                // КНОПКА ЗАКРИТТЯ
                 HStack {
                     Spacer()
                     Button("Закрити") {
-                        dismiss() // ⬅️ Викликаємо дію закриття
+                        dismiss() //Викликаємо дію закриття
                     }
                     .foregroundColor(.white)
                     .padding(.trailing, 16)
                 }
-                .padding(.top, 40) // ⬅️ Відступ від Status Bar (щоб не зливатися)
+                .padding(.top, 40)
                 
                 // ЗАГОЛОВКИ
                 Text(dayName)

@@ -1,21 +1,20 @@
-// DetailedForecastRow.swift
+// один рядок у модалці
 
 import SwiftUI
 
 // MARK: - Допоміжна Зовнішня Структура
-
-/// Відображає іконку погоди, завантажуючи її асинхронно з API.
 struct WeatherIcon: View {
     let url: URL?
     
     var body: some View {
+        //оьробляє коректно якщо if поверне nil
         Group {
             if let url = url {
                 AsyncImage(url: url) { phase in
                     if let image = phase.image {
-                        image.resizable().frame(width: 30, height: 30) // Фіксований розмір
+                        image.resizable().frame(width: 30, height: 30)
                     } else {
-                        ProgressView().frame(width: 30, height: 30).tint(.white) // Заглушка
+                        ProgressView().frame(width: 30, height: 30).tint(.white)
                     }
                 }
             }
@@ -23,16 +22,9 @@ struct WeatherIcon: View {
     }
 }
 
-// MARK: - Detailed Forecast Row View
-
-/// Відображає один рядок погодинного прогнозу всередині модального вікна DailyDetailView.
 struct DetailedForecastRow: View {
     
-    // MARK: - Властивості
-    
     let item: ForecastItem // Об'єкт прогнозу для конкретного 3-годинного інтервалу
-    
-    // MARK: - Обчислювані Властивості
     
     /// Форматує Unix timestamp у рядок часу (наприклад, "18:00").
     var timeString: String {
@@ -63,11 +55,11 @@ struct DetailedForecastRow: View {
             Text(item.main.temperatureString)
                 .font(.body)
                 .bold()
-                .frame(width: 50, alignment: .trailing) // ⬅️ Уточнено width
+                .frame(width: 50, alignment: .trailing)
         }
         // MARK: - Стилізація Рядка
         .padding()
-        .background(Color.black.opacity(0.3))
+        .background(Color.black.opacity(0.5))
         .cornerRadius(10)
         .foregroundColor(.white)
     }
