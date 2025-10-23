@@ -100,7 +100,7 @@ class WeatherViewModel: NSObject, ObservableObject {
         }
     }
     
-    //викликається коли  відоме міісто
+    //викликається коли  відоме місто
     private func fetchWeatherAndForecast(city: String, isSystemReserve: Bool) {
         service.fetchCurrentWeather(city: city) { [weak self] currentResult in
             self?.handleFetchResults(currentResult: currentResult, isLocationAttempt: false, isSystemReserve: isSystemReserve, lat: nil, lon: nil, city: city)

@@ -78,7 +78,7 @@ class WeatherService {
     // MARK: - Public API Endpoints (Запит за Координатами)
     // =============================================================
     
-    // Приватна функція для формування запиту координат
+    //функція для формування запиту координат
     private func createCoordinateQuery(lat: Double, lon: Double) -> [URLQueryItem] {
         return [
             URLQueryItem(name: "lat", value: "\(lat)"), // Параметр широти

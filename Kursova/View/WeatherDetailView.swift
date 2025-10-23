@@ -197,7 +197,7 @@ struct WeatherDetailView: View {
                     .padding(.leading)
                 
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 15) {
+                    HStack(spacing: 20) {
                         ForEach(viewModel.forecastItems, id: \.dt) { item in
                             ForecastItemView(item: item)
                         }

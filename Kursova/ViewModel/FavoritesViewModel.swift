@@ -30,7 +30,7 @@ class FavoritesViewModel: ObservableObject {
     
     //додавання міста в список
     func addCity(_ city: String) {
-        //очищення назви від зайвих пробіліів
+        //очищення назви від зайвих пробілів
         let normalizedCity = city.trimmingCharacters(in: .whitespacesAndNewlines)
         
         if !normalizedCity.isEmpty && !favoriteCities.contains(normalizedCity) {
@@ -40,7 +40,7 @@ class FavoritesViewModel: ObservableObject {
     
     //Видалення міста зі списку
     func removeCity(at offsets: IndexSet) {
-        favoriteCities.remove(atOffsets: offsets) // This will trigger `didSet`.
+        favoriteCities.remove(atOffsets: offsets)
     }
     
     /// Завантаження списку зі сховища

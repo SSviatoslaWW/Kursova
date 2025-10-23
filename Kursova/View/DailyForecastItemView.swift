@@ -51,7 +51,7 @@ struct DailyForecastItemView: View {
             }
             .foregroundColor(.white)
             // Це гарантує, що вся область, включаючи фон, реагує на натискання.
-            //.frame(maxWidth: .infinity) // ⬅️ Розтягує вміст на всю ширину.
+            //.frame(maxWidth: .infinity) //Розтягує вміст на всю ширину.
             .padding(.vertical, 10)
             .padding(.horizontal, 20)
             .background(Color.white.opacity(0.15)) // Напівпрозорий фон картки.
