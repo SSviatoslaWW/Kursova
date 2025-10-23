@@ -124,9 +124,15 @@ struct FavoritesView: View {
                             favoritesVM.removeCity(at: IndexSet(integer: index))
                         }
                     }) {
-                        Image(systemName: "minus.circle.fill")
-                            .foregroundColor(.red)
-                            .font(.title)
+                        ZStack {
+                            Circle()
+                                .fill(Color(white: 0.9).opacity(0.9))
+                                .frame(width: 30, height: 30)
+
+                            Image(systemName: "minus.circle.fill")
+                                .foregroundColor(.red)
+                                .font(.title)
+                        }
                     }
                     .transition(.move(edge: .leading).combined(with: .opacity))
                 }

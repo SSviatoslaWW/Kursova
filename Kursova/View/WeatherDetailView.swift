@@ -11,16 +11,17 @@ extension UIApplication {
 struct GradientPressableButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
+            .shadow(color: Color.black.opacity(0.3), radius: 1, x: 0, y: 1)
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
             .background(
                 LinearGradient(
                     gradient: Gradient(colors: [
-                        Color.white.opacity(0.3),
+                        Color.white.opacity(0.35),
                         Color.white.opacity(configuration.isPressed ? 0.6 : 0.4)
                     ]),
-                    startPoint: .leading,
-                    endPoint: .trailing
+                    startPoint: .top,
+                    endPoint: .bottom
                 )
             )
             .cornerRadius(10)
@@ -52,7 +53,7 @@ struct WeatherDetailView: View {
                     endPoint: .bottomTrailing
                 )
                 .ignoresSafeArea()
-
+                
                 // Основний контент
                 VStack(spacing: 15) {
                     
@@ -70,8 +71,6 @@ struct WeatherDetailView: View {
             }
         }
         .onAppear {
-            // ❗️ ВИПРАВЛЕННЯ №1: Викликаємо новий метод з ViewModel
-            // для запиту геолокації при першому запуску.
             if viewModel.currentWeather == nil {
                 viewModel.requestUserLocation()
             }
@@ -91,16 +90,17 @@ struct WeatherDetailView: View {
         
         var body: some View {
             HStack {
-                TextField("Введіть назву міста...", text: $cityInput)
-                    .padding(10)
-                    .background(Color.white.opacity(0.35))
-                    .cornerRadius(10)
-                    .foregroundColor(.white)
-                    .tint(.white) // Колір курсора
+                TextField("", text: $cityInput,
+                          prompt: Text("Введіть назву міста...")
+                    .foregroundColor(.white))
+                .padding(10)
+                .background(Color.white.opacity(0.35))
+                .cornerRadius(10)
+                .foregroundColor(.white)
+                .tint(.white)
                 
                 Button("Пошук") {
                     if !cityInput.isEmpty {
-                        // ❗️ ВИПРАВЛЕННЯ №2: Додано мітки параметрів (city:, lat:, lon:)
                         viewModel.fetchWeather(city: cityInput, lat: nil, lon: nil)
                         UIApplication.shared.endEditing()
                         cityInput = ""
@@ -195,7 +195,7 @@ struct WeatherDetailView: View {
                 Text("Погодинний прогноз")
                     .font(.title3).bold()
                     .padding(.leading)
-
+                
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 15) {
                         ForEach(viewModel.forecastItems, id: \.dt) { item in
@@ -204,6 +204,7 @@ struct WeatherDetailView: View {
                     }
                     .padding(.horizontal)
                 }
+                .scrollBounceBehavior(.basedOnSize)
             }
             .padding(.top, 20)
         }
@@ -217,7 +218,7 @@ struct WeatherDetailView: View {
                 Text("Прогноз на 5 днів")
                     .font(.title3).bold()
                     .padding(.leading)
-
+                
                 ForEach(viewModel.dailyForecast, id: \.dt) { item in
                     DailyForecastItemView(item: item, viewModel: viewModel)
                 }
