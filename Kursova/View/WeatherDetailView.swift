@@ -204,7 +204,7 @@ struct WeatherDetailView: View {
                     }
                     .padding(.horizontal)
                 }
-                .scrollBounceBehavior(.basedOnSize)
+                .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
             }
             .padding(.top, 20)
         }
