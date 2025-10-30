@@ -13,6 +13,22 @@ struct Coordinates: Decodable {
 struct Wind: Decodable {
     let speed: Double? // Швидкість вітру
     let deg: Int?      // Напрямок вітру (градуси)
+    
+    
+    // Перетворює градуси (0-360) на напрямок (Пн, Сх, Пд, Зх)
+    var directionShort: String {
+        guard let deg = deg else { return "—" }
+        
+        let directions = ["Пн", "ПнСх", "Сх", "ПдСх", "Пд", "ПдЗх", "Зх", "ПнЗх"]
+        let index = Int((Double(deg) + 22.5) / 45.0) & 7
+        return directions[index]
+    }
+    
+    // Обчислювана властивість для відображення швидкості
+    var speedString: String {
+        guard let speed = speed else { return "—" }
+        return String(format: "%.1f м/с", speed)
+    }
 }
 struct Clouds: Decodable {
     let all: Int // Хмарність у відсотках
@@ -89,6 +105,7 @@ struct ForecastItem: Decodable {
     let dt: Int             // Час прогнозу (Unix timestamp)
     let main: MainWeather   // Температурні дані для цього інтервалу
     let weather: [WeatherCondition] // Погодні умови для цього інтервалу
+    let wind: Wind?
     
     // Обчислювана властивість: конвертація Unix timestamp у Date
     var date: Date {
@@ -102,7 +119,7 @@ struct ForecastItem: Decodable {
         formatter.locale = Locale(identifier: "uk_UA")
         return formatter.string(from: date).capitalized
     }
-
+    
     //Скорочена назва дня (використовується для карток 5-денного прогнозу)
     var dayOfWeekShort: String {
         let formatter = DateFormatter()
@@ -112,11 +129,11 @@ struct ForecastItem: Decodable {
         return formatter.string(from: date).capitalized
     }
     
-        //Скорочена дата 24 жовт
+    //Скорочена дата 24 жовт
     var shortDateString: String {
-           let formatter = DateFormatter()
-           formatter.dateFormat = "d MMM"
-           formatter.locale = Locale(identifier: "uk_UA")
-           return formatter.string(from: date)
-       }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "d MMM"
+        formatter.locale = Locale(identifier: "uk_UA")
+        return formatter.string(from: date)
+    }
 }

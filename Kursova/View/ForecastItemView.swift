@@ -24,7 +24,7 @@ struct ForecastItemView: View {
         VStack(spacing: 8) {
             
             // 1. Час
-            Text(timeString) // ⬅️ Відображення часу
+            Text(timeString) 
                 .font(.caption)
             
             // 2. Іконка Погоди
@@ -44,6 +44,38 @@ struct ForecastItemView: View {
             Text(item.main.temperatureString)
                 .font(.headline)
             
+            // --- ВІТЕР ---
+            if let windData = item.wind {
+                HStack(spacing: 3) {
+                    Image(systemName: "wind") //Іконка вітру
+                        .resizable().frame(width: 11, height: 11)
+                    
+                    Text("\(windData.speedString) \(windData.directionShort)")
+                        .font(.caption)
+                        .lineLimit(1)
+                }
+                
+                // ---ТИСК---
+                HStack(spacing: 3) {
+                    Image(systemName: "chart.line.uptrend.xyaxis")
+                        .resizable().frame(width: 11, height: 11)
+                    
+                    Text("\(item.main.pressure) гПа")
+                        .font(.caption)
+                        .lineLimit(1)
+                }
+                
+                // ---ВОЛОГІСТЬ---
+                HStack(spacing: 3) {
+                    Image(systemName: "drop.fill")
+                        .resizable().frame(width: 12, height: 12)
+                        .foregroundColor(.indigo)
+                    
+                    Text("\(item.main.humidity)%")
+                        .font(.caption)
+                        .lineLimit(1)
+                }
+            }
         }
         .padding(10)
         .background(Color.white.opacity(0.2))

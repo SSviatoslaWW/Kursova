@@ -17,7 +17,7 @@ struct GradientPressableButtonStyle: ButtonStyle {
             .background(
                 LinearGradient(
                     gradient: Gradient(colors: [
-                        Color.white.opacity(0.35),
+                        Color.white.opacity(0.45),
                         Color.white.opacity(configuration.isPressed ? 0.6 : 0.4)
                     ]),
                     startPoint: .top,
@@ -204,7 +204,7 @@ struct WeatherDetailView: View {
                     }
                     .padding(.horizontal)
                 }
-                .scrollBounceBehavior(.basedOnSize)
+                .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
             }
             .padding(.top, 20)
         }

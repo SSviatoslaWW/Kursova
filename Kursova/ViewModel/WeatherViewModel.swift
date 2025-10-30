@@ -77,15 +77,15 @@ class WeatherViewModel: NSObject, ObservableObject {
         
         switch mainCondition {
         case "Thunderstorm": return [Color(red: 0.3, green: 0.1, blue: 0.4), Color(red: 0.1, green: 0.1, blue: 0.15)]
-        case "Snow": return [Color(red: 0.6, green: 0.7, blue: 0.9), Color(red: 0.85, green: 0.9, blue: 0.95)]
+        case "Snow": return [Color(red: 0.5, green: 0.6, blue: 0.8), Color(red: 0.75, green: 0.8, blue: 0.9)]
         case "Rain", "Drizzle": return [Color(red: 0.3, green: 0.4, blue: 0.6), Color(red: 0.4, green: 0.5, blue: 0.7)]
         default: break
         }
         
         if temp >= 30 {
-            return [Color(red: 0.9, green: 0.5, blue: 0.1), Color(red: 1.0, green: 0.8, blue: 0.4)]
+            return [Color(red: 0.8, green: 0.4, blue: 0.05), Color(red: 0.9, green: 0.7, blue: 0.3)]
         } else if temp >= 15 {
-            return [Color(red: 0.2, green: 0.6, blue: 0.85), Color(red: 0.6, green: 0.8, blue: 1.0)]
+            return [Color(red: 0.1, green: 0.5, blue: 0.75), Color(red: 0.5, green: 0.7, blue: 0.9)]
         } else if temp >= 5 {
             return [Color(red: 0.4, green: 0.5, blue: 0.6), Color(red: 0.7, green: 0.75, blue: 0.8)]
         } else {
