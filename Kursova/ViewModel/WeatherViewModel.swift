@@ -66,6 +66,21 @@ class WeatherViewModel: NSObject, ObservableObject {
             self.fetchWeatherAndForecast(city: city, isSystemReserve: isReserve)
         }
     }
+    
+    func getBackground() -> String {
+        guard let weatherData = currentWeather else {
+            return "ErrorBG"
+        }
+        let mainCondition = weatherData.weather.first?.main ?? "Default"
+        
+        
+        switch mainCondition {
+        case "Thunderstorm": return "ThunderstormBG"
+        case "Snow": return "SnowBG"
+        case "Rain", "Drizzle": return "RainBG"
+        default: return "GoodWeatherBG"
+        }
+    }
 
     func getBackgroundGradient() -> [Color] {
         guard let weatherData = currentWeather else {

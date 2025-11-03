@@ -13,15 +13,15 @@ struct FavoritesView: View {
     // MARK: - Body
     
     var body: some View {
-        ZStack {
-            // Фон, який динамічно змінюється, синхронізуючись з головним екраном
-            LinearGradient(
-                gradient: Gradient(colors: weatherVM.getBackgroundGradient()),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
+        GeometryReader {_ in 
+            ZStack {
+                // Фон, який динамічно змінюється, синхронізуючись з головним екраном
+                Image(weatherVM.getBackground())
+                    .resizable()
+                    .scaledToFill()
+                    .ignoresSafeArea()
 
+            }
             // Основний контейнер для контенту
             VStack(spacing: 0) {
                 HeaderView(
@@ -56,16 +56,17 @@ struct FavoritesView: View {
                 }
             }
             .foregroundColor(.white)
-        }
-        // Ми отримуємо старе і нове значення, але використовуємо тільки нове
-        .onChange(of: favoritesVM.favoriteCities) { oldValue, newValue in
-            // Якщо новий масив порожній і ми все ще в режимі редагування
-            if newValue.isEmpty && isEditing {
-                withAnimation(.spring()) {
-                    isEditing = false
+            // Ми отримуємо старе і нове значення, але використовуємо тільки нове
+            .onChange(of: favoritesVM.favoriteCities) { oldValue, newValue in
+                // Якщо новий масив порожній і ми все ще в режимі редагування
+                if newValue.isEmpty && isEditing {
+                    withAnimation(.spring()) {
+                        isEditing = false
+                    }
                 }
             }
         }
+        
     }
     
     // MARK: - Внутрішні компоненти UI (Subviews)
@@ -89,7 +90,7 @@ struct FavoritesView: View {
             HStack {
                 Text("Улюблені")
                     .font(.largeTitle).bold()
-                Spacer()
+                    Spacer()
                 
                 if showEditButton {
                     Button(isEditing ? "Готово" : "Змінити") {

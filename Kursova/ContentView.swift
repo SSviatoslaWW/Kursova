@@ -10,13 +10,7 @@ struct ContentView: View {
     
     var body: some View {
         ZStack {
-            // Глобальний градієнтний фон
-            LinearGradient(
-                gradient: Gradient(colors: weatherVM.getBackgroundGradient()),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea(.all)
+            
             
             // TabView для навігації
             TabView(selection: $selectedTab) {
