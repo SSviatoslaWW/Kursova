@@ -1,80 +1,128 @@
-// Картки 5 денного прогнозу кнопки
-
 import SwiftUI
 
 struct DailyForecastItemView: View {
     
-    let item: ForecastItem //Одиничний об'єкт прогнозу, що представляє один день.
+    let item: ForecastItem // "Перший" прогноз, який представляє цей день у списку
+    let neonGradientColors: [Color]
+    // 'viewModel' використовується ТІЛЬКИ для модального вікна (.sheet)
+    @ObservedObject var viewModel: WeatherViewModel
     
-    @ObservedObject var viewModel: WeatherViewModel // Доступ до загального стану для отримання детального прогнозу на день
+    @State private var showingDetail = false
     
-    @State private var showingDetail = false //Стан, що контролює видимість модального вікна (sheet).
+    // --- ОСНОВНА VIEW ---
     
     var body: some View {
-        // ОБГОРТАЄМО УСЕ В КНОПКУ
+        // Кнопка, що відкриває модальне вікно
         Button(action: {
             showingDetail = true
         }) {
-            HStack {
+            // Головний VStack, що містить Заголовок + Вміст
+            VStack(alignment: .leading, spacing: 8) {
                 
-                VStack(alignment: .leading, spacing: 2) {
-                    //День тижня (скорочена назва)
-                    Text(item.dayOfWeekShort)
-                        .font(.title3).bold()
+                // 1. ЗАГОЛОВОК: "Нд 2 лист."
+                Text("\(item.dayOfWeekShort) \(item.shortDateString)")
+                    .font(.headline)
+                    .shadow(color: .white.opacity(0.5), radius: 5) // Неоновий ефект
+                    .bold()
+                
+                // 2. ГОЛОВНИЙ HSTACK: (Іконка 1 | Велика Temp | Деталі)
+                HStack(spacing: 12) {
                     
-                    Text(item.shortDateString) 
-                        .font(.body)
-                        .foregroundColor(.white.opacity(0.8))
-                }
-                .frame(width: 90, alignment: .leading)
-                
-                Spacer()
-                
-                //Іконка (завантажується з API)
-                if let url = item.weather.first?.iconURL {
-                    AsyncImage(url: url) { phase in
+                    // --- КОЛОНКА 1: "іконка... перша" ---
+                    AsyncImage(url: item.weather.first?.iconURL) { phase in
                         if let image = phase.image {
-                            image.resizable().frame(width: 50, height: 50)
+                            image.resizable()
+                                .scaledToFit()
+                                .frame(width: 70, height: 70)
+                                .background(.white.opacity(0.5))
+                                .clipShape(Circle())
                         } else {
                             ProgressView().frame(width: 50, height: 50).tint(.white)
                         }
                     }
-                }
+                    .frame(width: 70)
+                    
+                    // --- КОЛОНКА 2: "велика температура... перша" ---
+                    Text(item.main.temperatureString)
+                        .font(.system(size: 45, weight: .bold))
+                        .shadow(color: .white.opacity(0.5), radius: 5) // Неоновий ефект
+                        .frame(width: 110, alignment: .center)
+                    Spacer()
+                    
+                    // --- КОЛОНКА 3: "наступна колонка" (Деталі) ---
+                    VStack(alignment: .leading, spacing: 4) {
+                        
+                        // 3.2. Рядок: "швидкість... вітру"
+                        HStack(spacing: 5) {
+                            // Вітер
+                            if let windData = item.wind {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "wind")
+                                        .font(.callout)
+                                    Text(windData.speedString + " " + windData.directionShort)
+                                        .font(.footnote.weight(.medium))
+                                }
+                            }
+                        }
+                        .foregroundColor(.white.opacity(0.9))
+                        
+                        // 3.3. Рядок: тиск
+                        // Тиск
+                        HStack(spacing: 5) {
+                            Image(systemName: "barometer") // Більш релевантна іконка
+                                .font(.callout)
+                            Text("\(item.main.pressure) гПа")
+                                .font(.footnote.weight(.medium))
+                        }
+                        .foregroundColor(.white.opacity(0.9))
+                        
+                        // 3.4. "знизу... смуга з вологістю"
+                        HumidityProgressBar(humidity: item.main.humidity, fillColor: .cyan)
+                            .padding(.top, 4)
+                        
+                    }// Кінець VStack (Колонка 3)
+                    
+                } // Кінець Hstack (Головний вміст)
                 
-                Spacer()
-                
-                // 3. Температура
-                Text(item.main.temperatureString)
-                    .font(.title2)
-                    .bold()
-                    .frame(width: 60, alignment: .trailing)
-            }
+            } // Кінець VStack (Головна картка)
             .foregroundColor(.white)
-            // Це гарантує, що вся область, включаючи фон, реагує на натискання.
-            //.frame(maxWidth: .infinity) //Розтягує вміст на всю ширину.
-            .padding(.vertical, 10)
-            .padding(.horizontal, 20)
-            .background(Color.white.opacity(0.15)) // Напівпрозорий фон картки.
-            .cornerRadius(15)
-            
+            .padding(.vertical, 12)
+            .padding(.horizontal, 16)
+            //.background(Color.white.opacity(0.15))
+            .cornerRadius(20)
+            .overlay( // Неонова рамка
+                AnimatedNeonBorder( // Використовуємо нашу анімовану рамку
+                    shape: RoundedRectangle(cornerRadius: 20),
+                    // ✅ Використовуємо передані кольори для градієнта рамки
+                    colors: neonGradientColors,
+                    lineWidth: 3,
+                    blurRadius: 4
+                )
+            )
             
         } // Закриття Button
         
-        
-        //Модальне Вікно (Детальний Прогноз)
+        // --- МОДАЛЬНЕ ВІКНО ---
+        // Ця логіка залишається без змін, оскільки
+        // для детального екрану потрібні ВСІ дані за день з viewModel.
         .sheet(isPresented: $showingDetail) {
             
             // 1. Отримання ключа дати (початок дня)
             let dateKey = Calendar.current.startOfDay(for: item.date)
-            
+             
             // 2. Отримання згрупованих даних для вибраного дня
             let itemsForDay = viewModel.groupedDailyForecast[dateKey] ?? []
-            
+             
             // 3. Ініціалізація детальної View
             DailyDetailView(
                 dayForecast: itemsForDay,
                 dayName: item.fullDayName // Повна назва дня для заголовка.
             )
         }
+    }
+    
+    // Допоміжна функція для форматування температури (min/max)
+    private func formatTemp(_ temp: Double) -> String {
+        return "\(Int(temp.rounded()))°C"
     }
 }

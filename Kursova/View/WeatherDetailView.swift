@@ -76,6 +76,14 @@ struct WeatherDetailView: View {
                     .resizable()
                     .scaledToFill()
                     .ignoresSafeArea()
+                    .overlay(
+                        // Додаємо накладення чорного кольору
+                        Color.black
+                        // Встановлюємо прозорість (0.0 = повністю прозорий, 1.0 = повністю чорний)
+                        // Можете погратися з цим значенням, щоб досягти бажаного ефекту
+                            .opacity(0.5)
+                            .ignoresSafeArea() // Переконайтеся, що накладення теж ігнорує безпечні зони
+                    )
             }
             // Основний контент
             VStack(spacing: 15) {
@@ -306,7 +314,7 @@ struct WeatherDetailView: View {
                     .padding(.leading)
                 
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 20) {
+                    HStack(spacing: 40) {
                         // ✅ ВИЗНАЧТЕ ПОВНІ ГРАДІЄНТИ
                         let firstGradientColors: [Color] = [.cyan, Color(red: 0.5, green: 0.8, blue: 1.0), .cyan]
                         let secondGradientColors: [Color] = [Color(red: 1.0, green: 0, blue: 1.0), .pink, Color(red: 1.0, green: 0, blue: 1.0)]
@@ -338,13 +346,24 @@ struct WeatherDetailView: View {
         @ObservedObject var viewModel: WeatherViewModel
         
         var body: some View {
-            VStack(alignment: .leading, spacing: 10) {
+            
+            // ✅ ВИЗНАЧТЕ ПОВНІ ГРАДІЄНТИ
+            let firstGradientColors: [Color] = [.cyan, Color(red: 0.5, green: 0.8, blue: 1.0), .cyan]
+            let secondGradientColors: [Color] = [Color(red: 1.0, green: 0, blue: 1.0), .pink, Color(red: 1.0, green: 0, blue: 1.0)]
+            
+            // Зберігаємо їх у масиві
+            let allGradients: [[Color]] = [firstGradientColors, secondGradientColors]
+            
+            VStack(alignment: .leading, spacing: 30) {
                 Text("Прогноз на 5 днів")
-                    .font(.title3).bold()
-                    .padding(.leading)
+                    .font(.title2).bold()
                 
-                ForEach(viewModel.dailyForecast, id: \.dt) { item in
-                    DailyForecastItemView(item: item, viewModel: viewModel)
+                ForEach(viewModel.dailyForecast.indices, id: \.self) { index in
+                    let item = viewModel.dailyForecast[index]
+                    // ✅ Чергуємо градієнти
+                    let currentGradient = allGradients[index % allGradients.count]
+                    
+                    DailyForecastItemView(item: item, neonGradientColors: currentGradient, viewModel: viewModel)
                 }
             }
             .padding(.top, 20)

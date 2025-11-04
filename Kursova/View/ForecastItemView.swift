@@ -3,7 +3,7 @@
 import SwiftUI
 
 /// Створює кастомну смугу прогресу для вологості з неоновим заповненням
-private struct HumidityProgressBar: View {
+struct HumidityProgressBar: View {
     let humidity: Int // Значення вологості, наприклад 77
     
     // ✅ ЗМІНЕНО: Тепер приймає один колір для заповнення
@@ -105,7 +105,7 @@ struct ForecastItemView: View {
                     HStack(spacing: 4) {
                         Image(systemName: "wind")
                             .font(.caption)
-                        Text(windData.speedString + " " + windData.directionShort) // Тільки швидкість
+                        Text(windData.speedString + " " + windData.directionShort) 
                             .font(.callout.weight(.medium))
                     }
                 }
