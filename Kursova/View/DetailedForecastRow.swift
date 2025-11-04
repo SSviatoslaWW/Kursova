@@ -7,7 +7,7 @@ struct WeatherIcon: View {
     let url: URL?
     
     var body: some View {
-        //оьробляє коректно якщо if поверне nil
+        //обробляє коректно якщо if поверне nil
         Group {
             if let url = url {
                 AsyncImage(url: url) { phase in

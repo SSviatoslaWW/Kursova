@@ -4,21 +4,17 @@ import Combine
 /// Manages the list of favorite cities and their persistence.
 class FavoritesViewModel: ObservableObject {
     
-    //масив назв міст
-    @Published var favoriteCities: [String] = [] {
+    @Published var favoriteLocations: [FavoriteLocation] = [] {
         didSet {
-            //оновлення стану видимості кнопки
-            shouldShowEditButton = !favoriteCities.isEmpty
-            // збереження змін
+            shouldShowEditButton = !favoriteLocations.isEmpty
             saveFavorites()
         }
     }
     
-    //Відповідає за видимість кнопки змінити
     @Published private(set) var shouldShowEditButton: Bool = false
     
-    /// The key used to store the list in UserDefaults.
-    private let key = "FavoriteCitiesList"
+    // ЗМІНЕНО: Новий ключ, щоб уникнути конфліктів зі старим [String]
+    private let key = "FavoriteLocationsList_v2"
     
     // MARK: - Initialization
     
@@ -28,29 +24,44 @@ class FavoritesViewModel: ObservableObject {
     
     // MARK: - Public Methods
     
-    //додавання міста в список
-    func addCity(_ city: String) {
-        //очищення назви від зайвих пробілів
-        let normalizedCity = city.trimmingCharacters(in: .whitespacesAndNewlines)
+    // ЗМІНЕНО: Логіка перевірки на дублікати
+    func addLocation(_ location: FavoriteLocation) {
         
-        if !normalizedCity.isEmpty && !favoriteCities.contains(normalizedCity) {
-            favoriteCities.append(normalizedCity) // This will trigger `didSet`.
+        // ПЕРЕВІРКА ЛИШЕ ЗА ID:
+        let alreadyExists = favoriteLocations.contains { $0.id == location.id }
+        
+        if !alreadyExists {
+            favoriteLocations.append(location) // This will trigger `didSet`.
         }
     }
     
-    //Видалення міста зі списку
-    func removeCity(at offsets: IndexSet) {
-        favoriteCities.remove(atOffsets: offsets)
+    func removeLocation(at offsets: IndexSet) {
+        favoriteLocations.remove(atOffsets: offsets)
     }
     
-    /// Завантаження списку зі сховища
+    // ЗМІНЕНО: Завантаження [FavoriteLocation]
     private func loadFavorites() {
-        if let savedCities = UserDefaults.standard.stringArray(forKey: key) {
-            favoriteCities = savedCities // викличе didset при першому завантажені
+        guard let data = UserDefaults.standard.data(forKey: key) else {
+            self.favoriteLocations = []
+            return
+        }
+        
+        do {
+            let loadedLocations = try JSONDecoder().decode([FavoriteLocation].self, from: data)
+            self.favoriteLocations = loadedLocations
+        } catch {
+            print("Failed to decode favorite locations: \(error)")
+            self.favoriteLocations = []
         }
     }
     
+    // ЗМІНЕНО: Збереження [FavoriteLocation]
     private func saveFavorites() {
-        UserDefaults.standard.set(favoriteCities, forKey: key)
+        do {
+            let data = try JSONEncoder().encode(favoriteLocations)
+            UserDefaults.standard.set(data, forKey: key)
+        } catch {
+            print("Failed to encode favorite locations: \(error)")
+        }
     }
 }

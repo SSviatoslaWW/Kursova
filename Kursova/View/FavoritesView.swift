@@ -4,49 +4,59 @@ struct FavoritesView: View {
     @ObservedObject var favoritesVM: FavoritesViewModel
     @ObservedObject var weatherVM: WeatherViewModel
     
-    // Приймає замикання з ContentView для обробки натискання на місто
-    let onCitySelect: (String) -> Void
+    // ЗМІНЕНО: Тепер передаємо цілий об'єкт FavoriteLocation
+    let onCitySelect: (FavoriteLocation) -> Void
     
-    //перемикач режипу редагування
     @State private var isEditing: Bool = false
     
     // MARK: - Body
     
     var body: some View {
-        GeometryReader {_ in 
+        GeometryReader {_ in
             ZStack {
-                // Фон, який динамічно змінюється, синхронізуючись з головним екраном
                 Image(weatherVM.getBackground())
                     .resizable()
                     .scaledToFill()
                     .ignoresSafeArea()
-
+                    .overlay(
+                        // Додаємо накладення чорного кольору
+                        Color.black
+                        // Встановлюємо прозорість (0.0 = повністю прозорий, 1.0 = повністю чорний)
+                        // Можете погратися з цим значенням, щоб досягти бажаного ефекту
+                            .opacity(0.5)
+                            .ignoresSafeArea() // Переконайтеся, що накладення теж ігнорує безпечні зони
+                    )
             }
-            // Основний контейнер для контенту
+            
             VStack(spacing: 0) {
                 HeaderView(
                     isEditing: $isEditing,
                     showEditButton: favoritesVM.shouldShowEditButton
                 )
                 
-                if favoritesVM.favoriteCities.isEmpty {
+                // ЗМІНЕНО: Перевіряємо .favoriteLocations
+                if favoritesVM.favoriteLocations.isEmpty {
                     EmptyStateView()
                     Spacer()
                 } else {
                     ScrollView {
                         LazyVStack(spacing: 12) {
-                            ForEach(favoritesVM.favoriteCities.indices, id: \.self) { index in
-                                let city = favoritesVM.favoriteCities[index]
-                                
-                                CityCardRow(
-                                    city: city,
-                                    index: index,
-                                    isEditing: isEditing,
-                                    favoritesVM: favoritesVM,
-                                    onSelect: {
-                                        onCitySelect(city)
-                                    }
-                                )
+                            // ЗМІНЕНО: Цикл по .favoriteLocations
+                            ForEach(favoritesVM.favoriteLocations.indices, id: \.self) { index in
+                                // Перевірка на випадок асинхронного видалення
+                                if index < favoritesVM.favoriteLocations.count {
+                                    let location = favoritesVM.favoriteLocations[index]
+                                    
+                                    CityCardRow(
+                                        location: location,
+                                        index: index,
+                                        isEditing: isEditing,
+                                        favoritesVM: favoritesVM,
+                                        onSelect: {
+                                            onCitySelect(location) // Передаємо весь об'єкт
+                                        }
+                                    )
+                                }
                             }
                         }
                         .padding(.horizontal, 16)
@@ -56,9 +66,8 @@ struct FavoritesView: View {
                 }
             }
             .foregroundColor(.white)
-            // Ми отримуємо старе і нове значення, але використовуємо тільки нове
-            .onChange(of: favoritesVM.favoriteCities) { oldValue, newValue in
-                // Якщо новий масив порожній і ми все ще в режимі редагування
+            // ЗМІНЕНО: Відстежуємо .favoriteLocations
+            .onChange(of: favoritesVM.favoriteLocations) { oldValue, newValue in
                 if newValue.isEmpty && isEditing {
                     withAnimation(.spring()) {
                         isEditing = false
@@ -66,10 +75,9 @@ struct FavoritesView: View {
                 }
             }
         }
-        
     }
     
-    // MARK: - Внутрішні компоненти UI (Subviews)
+    // MARK: - Subviews (Header, EmptyState)
     
     private struct EmptyStateView: View {
         var body: some View {
@@ -85,12 +93,13 @@ struct FavoritesView: View {
     private struct HeaderView: View {
         @Binding var isEditing: Bool
         let showEditButton: Bool
-
+        
         var body: some View {
             HStack {
                 Text("Улюблені")
                     .font(.largeTitle).bold()
-                    Spacer()
+                    .shadow(color: .white.opacity(0.5), radius: 3, x: 0, y: 0)
+                Spacer()
                 
                 if showEditButton {
                     Button(isEditing ? "Готово" : "Змінити") {
@@ -100,6 +109,7 @@ struct FavoritesView: View {
                     }
                     .font(.headline)
                     .foregroundColor(.white)
+                    .shadow(color: .white.opacity(0.5), radius: 3, x: 0, y: 0)
                     .transition(.opacity.combined(with: .scale))
                 }
             }
@@ -110,56 +120,110 @@ struct FavoritesView: View {
         }
     }
     
+    // --- ОСНОВНА ЗМІНА У CityCardRow ---
     private struct CityCardRow: View {
-        let city: String
+        let location: FavoriteLocation // Тепер це об'єкт
         let index: Int
         let isEditing: Bool
         @ObservedObject var favoritesVM: FavoritesViewModel
         let onSelect: () -> Void
-
+        
+        // Кольори для кнопки видалення
+        let deleteButtonColors: [Color] = [.red, .orange, .red]
+        
+        // ✅ НОВІ КОЛЬОРИ: Для рамки самої картки
+        let cardNeonColors: [Color] = [.cyan, .purple, .cyan]
+        
         var body: some View {
             HStack(spacing: 15) {
                 if isEditing {
+                    // --- Кнопка Видалення (без змін) ---
                     Button(action: {
                         withAnimation(.spring()) {
-                            favoritesVM.removeCity(at: IndexSet(integer: index))
+                            favoritesVM.removeLocation(at: IndexSet(integer: index))
                         }
                     }) {
                         ZStack {
-                            Circle()
-                                .fill(Color(white: 0.9).opacity(0.9))
-                                .frame(width: 30, height: 30)
-
-                            Image(systemName: "minus.circle.fill")
-                                .foregroundColor(.red)
-                                .font(.title)
+                            AnimatedNeonBorder(
+                                shape: Circle(),
+                                colors: deleteButtonColors,
+                                lineWidth: 3,
+                                blurRadius: 4
+                            )
+                            .frame(width: 50, height: 50)
+                            
+                            Image(systemName: "trash.fill")
+                                .foregroundColor(.white)
+                                .font(.title2)
+                                .shadow(color: .red.opacity(0.8), radius: 5, x: 0, y: 0)
                         }
                     }
                     .transition(.move(edge: .leading).combined(with: .opacity))
                 }
-
+                
+                // --- Головна Кнопка Картки ---
                 Button(action: {
-                    if !isEditing {
-                        onSelect()
-                    }
+                    if !isEditing { onSelect() }
                 }) {
                     HStack {
-                        Text(city)
-                            .font(.title2)
-                            .fontWeight(.medium)
+                        
+                        // --- 1. ЛІВА КОЛОНКА (Назва і країна) ---
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(location.name)
+                                .font(.title2)
+                                .fontWeight(.bold)
+                            // ✅ НЕОНОВИЙ ТЕКСТ: Додаємо біле світіння
+                                .shadow(color: .white.opacity(0.7), radius: 7, x: 0, y: 0)
+                            
+                            Text(location.country)
+                                .font(.callout)
+                                .foregroundColor(.white.opacity(0.8))
+                            // ✅ НЕОНОВИЙ ТЕКСТ: Слабше світіння
+                                .shadow(color: .white.opacity(0.5), radius: 3, x: 0, y: 0)
+                        }
+                        
                         Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(.headline)
-                            .foregroundColor(.white.opacity(0.7))
+                        
+                        // --- 2. ПРАВА КОЛОНКА (Координати з іконками) ---
+                        VStack(alignment: .leading, spacing: 8) {
+                            // Широта
+                            HStack(spacing: 5) {
+                                Image(systemName: "arrow.up.and.down.circle")
+                                    .font(.caption)
+                                Text(String(format: "%.2f°", location.lat))
+                                    .font(.callout).bold()
+                            }
+                            
+                            // Довгота
+                            HStack(spacing: 5) {
+                                Image(systemName: "arrow.left.and.right.circle")
+                                    .font(.caption)
+                                Text(String(format: "%.2f°", location.lon))
+                                    .font(.callout).bold()
+                            }
+                        }
+                        .foregroundColor(.white.opacity(0.9))
+                        // ✅ НЕОНОВИЙ ТЕКСТ: Світіння для координат
+                        .shadow(color: .white.opacity(0.6), radius: 5, x: 0, y: 0)
+                        
                     }
                     .padding()
                     .frame(maxWidth: .infinity)
-                    .background(Color.white.opacity(0.15))
-                    .cornerRadius(12)
+                    // .background(Color.white.opacity(0.15)) // ❌ ВИДАЛЕНО
+                    
+                    // ✅ НЕОНОВА ОБГОРТКА: Додаємо AnimatedNeonBorder замість .background
+                    .overlay(
+                        AnimatedNeonBorder(
+                            shape: RoundedRectangle(cornerRadius: 16),
+                            colors: cardNeonColors, // 👈 Нові кольори
+                            lineWidth: 5,
+                            blurRadius: 5
+                        )
+                    )
+                    // Обрізаємо вміст за тими ж кутами
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
                 }
-                //.buttonStyle(.plain)
             }
         }
     }
 }
-

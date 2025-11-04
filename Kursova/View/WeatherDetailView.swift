@@ -238,7 +238,7 @@ struct WeatherDetailView: View {
         
         var body: some View {
             // 1. Перевіряємо, чи є це місто вже в улюблених (для візуального стану)
-            let isFavorite = favoritesVM.favoriteCities.contains(weather.name)
+            let isFavorite = favoritesVM.favoriteLocations.contains(where: { $0.id == weather.id })
             
             // 2. Головний контейнер (HStack)
             HStack(alignment: .center) {
@@ -262,9 +262,23 @@ struct WeatherDetailView: View {
                 
                 // Права частина (Кнопка "Улюблене")
                 Button {
-                    // ✅ ЗМІНА ЛОГІКИ: Кнопка тепер ТІЛЬКИ додає.
-                    // Ваша ViewModel має сама обробляти дублікати.
-                    favoritesVM.addCity(weather.name)
+                    // 2. Отримуємо код країни (напр., "UA")
+                        let countryCode = weather.sys.country
+                        
+                        // 3. Конвертуємо код у повну назву
+                        let countryName = Locale.current.localizedString(forRegionCode: countryCode) ?? countryCode
+                        
+                        // 4. Створюємо об'єкт FavoriteLocation З УСІМА ДАНИМИ
+                        let newFavorite = FavoriteLocation(
+                            id: weather.id,           // <-- ВАШЕ ID МІСТА
+                            name: weather.name,
+                            country: countryName,
+                            lat: weather.coord.lat,
+                            lon: weather.coord.lon
+                        )
+                        
+                        // 5. Викликаємо нову функцію
+                        favoritesVM.addLocation(newFavorite)
                     
                 } label: {
                     // ZStack для накладання іконки на бордюр
