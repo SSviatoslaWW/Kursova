@@ -64,4 +64,9 @@ class FavoritesViewModel: ObservableObject {
             print("Failed to encode favorite locations: \(error)")
         }
     }
+    
+    
+    
+    
+    
 }

@@ -66,6 +66,8 @@ struct WeatherDetailView: View {
     @ObservedObject var favoritesVM: FavoritesViewModel
     @State private var cityInput: String = ""
     
+    @StateObject private var searchManager = CitySearchManager()
+    
     // MARK: - Body
     
     var body: some View {
@@ -86,10 +88,11 @@ struct WeatherDetailView: View {
                     )
             }
             // Основний контент
-            VStack(spacing: 15) {
+            VStack(spacing: 20) {
                 
                 // Панель пошуку
-                SearchPanel(viewModel: viewModel, cityInput: $cityInput)
+                SearchPanel(viewModel: viewModel, cityInput: $cityInput, searchManager: searchManager)
+                    .zIndex(2)
                 
                 // Індикатор завантаження або повідомлення про помилку
                 StatusAndErrorView(viewModel: viewModel)
@@ -117,67 +120,125 @@ struct WeatherDetailView: View {
     
     
     
+    /// Панель пошуку з неоновим стилем та автозаповненням (Overlay версія)
     private struct SearchPanel: View {
         @ObservedObject var viewModel: WeatherViewModel
         @Binding var cityInput: String
+        @ObservedObject var searchManager: CitySearchManager
+        @FocusState private var isFocused: Bool
         
-        // Кольори ті самі
         let barGradientColors: [Color] = [.cyan, Color(red: 1.0, green: 0, blue: 1.0), .cyan]
         let buttonGradientColors: [Color] = [Color(red: 1.0, green: 0, blue: 1.0), .pink, Color(red: 1.0, green: 0, blue: 1.0)]
         
         var body: some View {
-            HStack(spacing: 15) {
-                // 1. Іконка лупи (з неоновим сяйвом)
-                Image(systemName: "magnifyingglass")
-                    .foregroundColor(.white)
+            VStack(spacing: 0) { // Зовнішній контейнер для вирівнювання
                 
-                // 2. Текстове поле (з неоновим текстом)
-                ZStack(alignment: .leading) {
-                    // ✅ ОНОВЛЕНО: Неоновий placeholder
-                    if cityInput.isEmpty {
-                        Text("Введіть назву міста...")
-                            .foregroundColor(.white.opacity(0.6))
+                // --- ОСНОВНА ПАНЕЛЬ ПОШУКУ ---
+                HStack(spacing: 15) {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(.white)
+                    
+                    ZStack(alignment: .leading) {
+                        if cityInput.isEmpty {
+                            Text("Введіть назву міста...").foregroundColor(.white.opacity(0.6))
+                        }
+                        TextField("", text: $cityInput)
+                            .foregroundColor(.white)
+                            .tint(.white)
+                            .focused($isFocused)
+                            .onChange(of: cityInput) { _, newValue in
+                                searchManager.queryFragment = newValue
+                            }
+                            .submitLabel(.search)
+                            .onSubmit { performSearch(for: cityInput) }
                     }
                     
-                    TextField("", text: $cityInput)
+                    Button("Пошук") { performSearch(for: cityInput) }
+                        .padding(.vertical, 10)
+                        .padding(.horizontal, 20)
                         .foregroundColor(.white)
-                        .tint(.white) // Колір курсора
+                        .overlay(
+                            AnimatedNeonBorder(shape: Capsule(), colors: buttonGradientColors, lineWidth: 3, blurRadius: 4)
+                        )
                 }
-                .padding(.trailing, 5)
-                
-                // 3. Кнопка "Пошук" (з неоновим текстом)
-                Button("Пошук") {
-                    if !cityInput.isEmpty {
-                        viewModel.fetchWeather(city: cityInput, lat: nil, lon: nil)
-                        UIApplication.shared.endEditing()
-                        cityInput = ""
-                    }
-                }
-                .padding(.vertical, 10)
-                .padding(.horizontal, 20)
-                .foregroundColor(.white)
+                .padding(.horizontal)
+                .padding(.vertical, 8)
                 .overlay(
-                    AnimatedNeonBorder(
-                        shape: Capsule(),
-                        colors: buttonGradientColors,
-                        lineWidth: 3,
-                        blurRadius: 4
-                    )
+                    AnimatedNeonBorder(shape: Capsule(), colors: barGradientColors, lineWidth: 4, blurRadius: 5)
                 )
+                .padding(.horizontal)
                 
+                // 🛑 ВИПРАВЛЕННЯ: СПИСОК ЯК OVERLAY (щоб не штовхав контент)
+                // Ми використовуємо overlay на порожньому Color.clear під полем пошуку,
+                // щоб список "випадав" вниз, не займаючи фізичного місця у VStack.
             }
-            .padding(.horizontal)
-            .padding(.vertical, 8)
-            .overlay(
-                AnimatedNeonBorder(
-                    shape: Capsule(),
-                    colors: barGradientColors,
-                    lineWidth: 4,
-                    blurRadius: 5
-                )
-            )
-            .padding(.horizontal)
-            .padding(.top, 10)
+            .overlay(alignment: .top) { // ⬅️ Overlay вирівняний по верху
+                
+                if isFocused && !searchManager.results.isEmpty && !cityInput.isEmpty {
+                    ScrollView {
+                        LazyVStack(alignment: .leading, spacing: 0) {
+                            ForEach(searchManager.results) { result in
+                                Button {
+                                    performSearch(for: result.title)
+                                } label: {
+                                    VStack(alignment: .leading) {
+                                        Text(result.title)
+                                            .foregroundColor(.white).bold()
+                                            .shadow(color: .cyan.opacity(0.8), radius: 2)
+                                        if !result.subtitle.isEmpty {
+                                            Text(result.subtitle).font(.caption).foregroundColor(.gray)
+                                        }
+                                    }
+                                    .padding(.vertical, 12)
+                                    .padding(.horizontal)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                                Divider()
+                                    .background(
+                                        LinearGradient(colors: [.cyan, .purple], startPoint: .leading, endPoint: .trailing)
+                                    )
+                                    .shadow(color: .purple.opacity(0.8), radius: 2)
+                            }
+                        }
+                    }
+                    .overlay(
+                        AnimatedNeonBorder(
+                            shape: RoundedRectangle(cornerRadius: 15), // Форма рамки
+                            colors: [.cyan, Color(red: 1.0, green: 0, blue: 1.0), .cyan], // Ваші неонові кольори
+                            lineWidth: 3, // Товщина лінії
+                            blurRadius: 5 // Радіус світіння
+                        )
+                    )
+                    // Додатковий напівпрозорий темний шар для кращої читабельності на яскравому фоні
+                    .background(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                Color(red: 0.1, green: 0.05, blue: 0.2).opacity(0.95), // Дуже темний фіолетовий
+                                Color.black.opacity(0.98),                             // Майже чорний по центру
+                                Color(red: 0.05, green: 0.1, blue: 0.2).opacity(0.95)  // Дуже темний синій внизу
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .cornerRadius(15)
+                    .frame(height: 200)
+                    .padding(.horizontal, 20) // Відступи, щоб відповідати ширині поля
+                    // 🛑 ЗСУВ ВНИЗ: Зміщуємо список під поле пошуку (підберіть значення, ~60-70pt)
+                    .offset(y: 60)
+                    .transition(.opacity)
+                }
+            }
+        }
+        
+        private func performSearch(for city: String) {
+            if !city.isEmpty {
+                cityInput = city
+                viewModel.fetchWeather(city: city, lat: nil, lon: nil)
+                isFocused = false
+                UIApplication.shared.endEditing()
+                cityInput = ""
+            }
         }
     }
     
@@ -190,14 +251,57 @@ struct WeatherDetailView: View {
                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
                     .padding(.vertical, 10)
             } else if let errorMsg = viewModel.errorMessage {
-                Text("⚠️ \(errorMsg)")
-                    .foregroundColor(.yellow)
-                    .padding()
-                    .background(Color.black.opacity(0.3))
-                    .cornerRadius(10)
+                NeonErrorView(errorMessage: errorMsg)
             }
         }
     }
+    
+    /// Неонове повідомлення про помилку
+        private struct NeonErrorView: View {
+            let errorMessage: String
+            
+            // Неонові кольори для помилки (жовто-червоні)
+            let errorGradientColors: [Color] = [.yellow, .orange, .red, .orange, .yellow]
+            
+            var body: some View {
+                VStack(spacing: 10) {
+                    // Велика іконка попередження
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 40))
+                        .foregroundColor(.yellow)
+                        .shadow(color: .orange, radius: 10) // Неонове світіння іконки
+                    
+                    // Текст помилки
+                    Text(errorMessage)
+                        .font(.headline)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.white)
+                        .padding(.horizontal)
+                }
+                .padding(.vertical, 20)
+                .padding(.horizontal, 30)
+                .background(Color.black.opacity(0.6)) // Темніший фон для кращого контрасту
+                .cornerRadius(20)
+                // Неонова рамка
+                .overlay(
+                    AnimatedNeonBorder(
+                        shape: RoundedRectangle(cornerRadius: 20),
+                        colors: errorGradientColors,
+                        lineWidth: 4,
+                        blurRadius: 6
+                    )
+                )
+                // Центрування на екрані
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                .padding(.horizontal, 40) // Відступи від країв екрана
+            }
+        }
+    
+    
+    
+    
+    
+    
     
     private struct WeatherScrollView: View {
         @ObservedObject var viewModel: WeatherViewModel
@@ -263,22 +367,22 @@ struct WeatherDetailView: View {
                 // Права частина (Кнопка "Улюблене")
                 Button {
                     // 2. Отримуємо код країни (напр., "UA")
-                        let countryCode = weather.sys.country
-                        
-                        // 3. Конвертуємо код у повну назву
-                        let countryName = Locale.current.localizedString(forRegionCode: countryCode) ?? countryCode
-                        
-                        // 4. Створюємо об'єкт FavoriteLocation З УСІМА ДАНИМИ
-                        let newFavorite = FavoriteLocation(
-                            id: weather.id,           // <-- ВАШЕ ID МІСТА
-                            name: weather.name,
-                            country: countryName,
-                            lat: weather.coord.lat,
-                            lon: weather.coord.lon
-                        )
-                        
-                        // 5. Викликаємо нову функцію
-                        favoritesVM.addLocation(newFavorite)
+                    let countryCode = weather.sys.country
+                    
+                    // 3. Конвертуємо код у повну назву
+                    let countryName = Locale.current.localizedString(forRegionCode: countryCode) ?? countryCode
+                    
+                    // 4. Створюємо об'єкт FavoriteLocation З УСІМА ДАНИМИ
+                    let newFavorite = FavoriteLocation(
+                        id: weather.id,           // <-- ВАШЕ ID МІСТА
+                        name: weather.name,
+                        country: countryName,
+                        lat: weather.coord.lat,
+                        lon: weather.coord.lon
+                    )
+                    
+                    // 5. Викликаємо нову функцію
+                    favoritesVM.addLocation(newFavorite)
                     
                 } label: {
                     // ZStack для накладання іконки на бордюр

@@ -12,7 +12,8 @@ struct WeatherIcon: View {
             if let url = url {
                 AsyncImage(url: url) { phase in
                     if let image = phase.image {
-                        image.resizable().frame(width: 30, height: 30)
+                        image.resizable().frame(width: 50, height: 50).background(.ultraThinMaterial)
+                            .clipShape(Circle())
                     } else {
                         ProgressView().frame(width: 30, height: 30).tint(.white)
                     }
@@ -22,11 +23,11 @@ struct WeatherIcon: View {
     }
 }
 
+// MARK: - Основний Рядок Прогнозу
 struct DetailedForecastRow: View {
     
-    let item: ForecastItem // Об'єкт прогнозу для конкретного 3-годинного інтервалу
+    let item: ForecastItem
     
-    /// Форматує Unix timestamp у рядок часу (наприклад, "18:00").
     var timeString: String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "uk_UA")
@@ -34,33 +35,49 @@ struct DetailedForecastRow: View {
         return formatter.string(from: item.date)
     }
 
-    // MARK: - Body View
-    
     var body: some View {
-        HStack(spacing: 15) {
+        HStack {
+            // ЛІВА ЧАСТИНА: Час та Температура
+            VStack(alignment: .leading, spacing: 4) {
+                Text(timeString)
+                    .font(.subheadline)
+                    .foregroundColor(.white.opacity(0.8))
+                
+                Text(item.main.temperatureString)
+                    .font(.system(size: 28, weight: .bold)) // Збільшений шрифт як на макеті
+                    .foregroundColor(.white)
+            }
             
-            // 1. Час
-            Text(timeString)
-                .frame(width: 50, alignment: .leading)
-                .bold()
+            Spacer()
             
-            // 2. Іконка (Викликаємо зовнішню структуру)
-            WeatherIcon(url: item.weather.first?.iconURL)
-            
-            // 3. Опис Погоди
-            Text(item.weather.first?.description.capitalized ?? "---")
-                .frame(maxWidth: .infinity, alignment: .leading)
-            
-            // 4. Температура
-            Text(item.main.temperatureString)
-                .font(.body)
-                .bold()
-                .frame(width: 50, alignment: .trailing)
+            // ПРАВА ЧАСТИНА: Іконка та Опис
+            HStack(spacing: 12) {
+                Spacer()
+                WeatherIcon(url: item.weather.first?.iconURL)
+                Spacer()
+                Text(item.weather.first?.description.capitalized ?? "---")
+                    .font(.body)
+                    .foregroundColor(.white)
+            }
         }
-        // MARK: - Стилізація Рядка
-        .padding()
-        .background(Color.black.opacity(0.5))
-        .cornerRadius(10)
-        .foregroundColor(.white)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+        .background(
+            ZStack {
+                // Напівпрозорий чорний фон плашки
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color.black.opacity(0.4))
+                
+                // Неонова рамка поверх фону
+                AnimatedNeonBorder(
+                    shape: RoundedRectangle(cornerRadius: 20),
+                    colors: [.cyan, .blue, .purple, .cyan], // Можна змінити кольори тут
+                    lineWidth: 3,
+                    blurRadius: 6
+                )
+            }
+        )
+        // Додатковий відступ зовні, щоб рамку не обрізало
+        .padding(2)
     }
 }

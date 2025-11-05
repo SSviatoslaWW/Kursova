@@ -120,9 +120,4 @@ struct DailyForecastItemView: View {
             )
         }
     }
-    
-    // Допоміжна функція для форматування температури (min/max)
-    private func formatTemp(_ temp: Double) -> String {
-        return "\(Int(temp.rounded()))°C"
-    }
 }

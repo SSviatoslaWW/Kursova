@@ -11,7 +11,7 @@ class WeatherService {
         var baseQueryItems = [
             URLQueryItem(name: "appid", value: Constants.apiKey),     //  API ключ
             URLQueryItem(name: "units", value: Constants.units),      //  Метричні одиниці (°C)
-            URLQueryItem(name: "lang", value: "uk")                   //  Мова відповіді (Українська)
+            URLQueryItem(name: "lang", value: "ua")                   //  Мова відповіді (Українська)
         ]
         
         baseQueryItems.append(contentsOf: queryItems)

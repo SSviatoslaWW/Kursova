@@ -32,6 +32,9 @@ struct ContentView: View {
                         weatherVM.fetchWeather(city: selectedCity.name, lat: nil, lon: nil)
                         //Перемикаємо на вкладку погоди
                         selectedTab = 0
+                    },
+                    onClose: {
+                        selectedTab = 0 // Також просто перемикаємось на першу вкладку
                     }
                 )
                 .tabItem {
@@ -42,4 +45,7 @@ struct ContentView: View {
             .tint(.orange)
         }
     }
+}
+#Preview {
+    ContentView()
 }

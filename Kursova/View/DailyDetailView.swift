@@ -20,41 +20,50 @@ struct DailyDetailView: View {
     }
 
     /// Визначає кольори градієнта на основі температури та критичних погодних умов.
-    private func getBackgroundGradient(for item: ForecastItem?) -> [Color] {
+    private func getBackground(for item: ForecastItem?) -> String {
         guard let weatherData = item else {
-            return [Color(red: 0.1, green: 0.1, blue: 0.2), Color(red: 0.3, green: 0.3, blue: 0.4)]
+            return "ErrorBG"
         }
         
         let mainCondition = weatherData.weather.first?.main ?? "Default"
-        let temp = weatherData.main.temp
         
         // 1. КРИТИЧНІ УМОВИ
         switch mainCondition {
-        case "Thunderstorm": return [Color(red: 0.3, green: 0.1, blue: 0.4), Color(red: 0.1, green: 0.1, blue: 0.15)]
-        case "Snow": return [Color(red: 0.6, green: 0.7, blue: 0.9), Color(red: 0.85, green: 0.9, blue: 0.95)]
-        case "Rain", "Drizzle": return [Color(red: 0.3, green: 0.4, blue: 0.6), Color(red: 0.4, green: 0.5, blue: 0.7)]
-        default: break
+        case "Thunderstorm": return "ThunderstormBG"
+        case "Snow": return "SnowBG"
+        case "Rain", "Drizzle": return "RainBG"
+        default: return "GoodWeatherBG"
         }
 
-        // 2. ТЕМПЕРАТУРНІ КАТЕГОРІЇ
-        if temp >= 30 { return [Color(red: 0.9, green: 0.5, blue: 0.1), Color(red: 1.0, green: 0.8, blue: 0.4)] }
-        else if temp >= 15 { return [Color(red: 0.2, green: 0.6, blue: 0.85), Color(red: 0.6, green: 0.8, blue: 1.0)] }
-        else if temp >= 5 { return [Color(red: 0.4, green: 0.5, blue: 0.6), Color(red: 0.7, green: 0.75, blue: 0.8)] }
-        else { return [Color(red: 0.2, green: 0.2, blue: 0.5), Color(red: 0.4, green: 0.4, blue: 0.7)] }
     }
+    
+    
     
     // MARK: - Body View
     
     var body: some View {
-        ZStack {
-            
-            // 1. Градієнт (ФОН)
-            LinearGradient(
-                gradient: Gradient(colors: getBackgroundGradient(for: dayForecast.first)),
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea(.all)
+        GeometryReader {_ in 
+            ZStack {
+                
+                // Фон, що заповнює весь екран
+                Image(getBackground(for: dayForecast.first))
+                    .resizable()
+                    .scaledToFill()
+                    .ignoresSafeArea()
+                    .overlay(
+                        // Додаємо накладення чорного кольору
+                        Color.black
+                        // Встановлюємо прозорість (0.0 = повністю прозорий, 1.0 = повністю чорний)
+                        // Можете погратися з цим значенням, щоб досягти бажаного ефекту
+                            .opacity(0.3)
+                            .ignoresSafeArea() // Переконайтеся, що накладення теж ігнорує безпечні зони
+                    )
+                
+                
+                
+            } // Закриття ZStack
+            //.presentationDetents([.large]) // Повноекранний режим
+            //.presentationDragIndicator(.hidden) // Приховуємо індикатор
             
             VStack(spacing: 0) {
                 
@@ -63,7 +72,7 @@ struct DailyDetailView: View {
                 
                 // 2. Скрол для всіх погодинних карток
                 ScrollView {
-                    VStack(spacing: 8) {
+                    VStack(spacing: 16) {
                         ForEach(dayForecast, id: \.dt) { item in
                             DetailedForecastRow(item: item)
                         }
@@ -74,10 +83,7 @@ struct DailyDetailView: View {
             }
             .foregroundColor(.white)
             .shadow(color: .black.opacity(0.4), radius: 3, x: 0, y: 1)
-            
-        } // Закриття ZStack
-        //.presentationDetents([.large]) // Повноекранний режим
-        //.presentationDragIndicator(.hidden) // Приховуємо індикатор
+        }
     }
     
     // =============================================================
@@ -91,7 +97,7 @@ struct DailyDetailView: View {
         let dismiss: DismissAction
         
         var body: some View {
-            VStack(spacing: 5) {
+            VStack(alignment: .leading, spacing: 5) {
                 
                 // КНОПКА ЗАКРИТТЯ
                 HStack {
@@ -101,17 +107,25 @@ struct DailyDetailView: View {
                     }
                     .foregroundColor(.white)
                     .padding(.trailing, 16)
+                    // Основний яскравий контур (світіння біля тексту)
+                    .shadow(color: .white, radius: 1)
+                    // (Опціонально) Третій шар для ще сильнішого ефекту
+                    .shadow(color: .white.opacity(0.5), radius: 10)
                 }
                 .padding(.top, 40)
                 
                 // ЗАГОЛОВКИ
                 Text(dayName)
                     .font(.largeTitle).bold()
+                    .shadow(color: .white.opacity(0.5), radius: 10)
+                    .padding(.leading, 20)
                 
-                Text("Дата: \(fullDateString)")
+                Text("\(fullDateString)")
                     .font(.headline)
+                    .shadow(color: .white.opacity(0.5), radius: 10)
+                    .padding(.leading, 20)
             }
-            .padding(.bottom, 20)
+            .padding(.bottom, 10)
         }
     }
 }
