@@ -77,7 +77,7 @@ struct DailyForecastItemView: View {
                         .foregroundColor(.white.opacity(0.9))
                         
                         // 3.4. "знизу... смуга з вологістю"
-                        HumidityProgressBar(humidity: item.main.humidity, fillColor: .cyan)
+                        HumidityProgressBar(humidity: item.main.humidity, fillColor: AppColors.indicatorCyan)
                             .padding(.top, 4)
                         
                     }// Кінець VStack (Колонка 3)

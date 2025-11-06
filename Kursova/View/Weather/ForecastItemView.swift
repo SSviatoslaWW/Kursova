@@ -2,48 +2,6 @@
 
 import SwiftUI
 
-/// Створює кастомну смугу прогресу для вологості з неоновим заповненням
-struct HumidityProgressBar: View {
-    let humidity: Int // Значення вологості, наприклад 77
-    
-    // ✅ ЗМІНЕНО: Тепер приймає один колір для заповнення
-    let fillColor: Color
-        
-    var body: some View {
-        let humidityFraction = Double(humidity) / 100.0
-        
-        VStack(spacing: 4) { // Використовуємо VStack, щоб розмістити текст під смугою
-            GeometryReader { geometry in
-                ZStack(alignment: .leading) {
-                    // 1. "Доріжка" (фон смуги)
-                    Capsule()
-                        .fill(Color.white.opacity(0.2))
-                        .frame(height: 8)
-                    
-                    // 2. ✅ ОНОВЛЕНО: Просте неонове заповнення
-                    Capsule()
-                        .fill(fillColor) // Використовуємо один колір
-                        // Додаємо тінь для "неонового" ефекту
-                        .shadow(color: fillColor.opacity(0.7), radius: 3, x: 0, y: 0)
-                        // Обрізаємо заповнення по ширині
-                        .frame(width: geometry.size.width * humidityFraction)
-                        //.clipped() // Обрізаємо, щоб тінь не виходила за межі доріжки
-                }
-            }
-            .frame(height: 8) // Встановлюємо висоту для GeometryReader
-            
-            // 3. Текстова мітка під смугою (без змін)
-            Text("\(humidity)%")
-                .font(.system(size: 10, weight: .bold))
-                .foregroundColor(.white)
-                .shadow(color: .white.opacity(0.4), radius: 2) // Легке сяйво
-        }
-    }
-}
-
-
-
-
 /// Структура відображає одну картку прогнозу в стилі "неонового скла".
 struct ForecastItemView: View {
     
@@ -125,12 +83,7 @@ struct ForecastItemView: View {
             
             // 5. Смуга Вологості (використовуємо нашу нову View)
             // ✅ Передаємо кольори для градієнта заповнення
-            HumidityProgressBar(humidity: item.main.humidity, fillColor: .cyan)
-            
-            // ❗️ Якщо у вас є дані по хмарності, ви можете додати другу смугу:
-            // if let cloudiness = item.clouds?.all {
-            //    HumidityProgressBar(humidity: cloudiness, gradientColors: neonGradientColors)
-            // }
+            HumidityProgressBar(humidity: item.main.humidity, fillColor: AppColors.indicatorCyan)
             
         }
         .padding(.vertical, 16)
