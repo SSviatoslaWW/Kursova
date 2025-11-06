@@ -179,7 +179,9 @@ struct WeatherDetailView: View {
                         LazyVStack(alignment: .leading, spacing: 0) {
                             ForEach(searchManager.results) { result in
                                 Button {
-                                    performSearch(for: result.title)
+                                    let cityName = result.title.components(separatedBy: ",").first?.trimmingCharacters(in: .whitespaces) ?? result.title
+                                    performSearch(for: cityName)
+                                    print(cityName)
                                 } label: {
                                     VStack(alignment: .leading) {
                                         Text(result.title)
