@@ -10,7 +10,7 @@ enum LocationError: Error {
 
 class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     
-    // ЗМІНА 1: Робимо manager доступним для читання ззовні (для доступу до .location)
+    // Робимо manager доступним для читання ззовні (для доступу до .location)
     // або можна залишити private і додати публічний метод getLastLocation()
     let manager = CLLocationManager()
     
@@ -20,18 +20,16 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         super.init()
         manager.delegate = self
         // kCLLocationAccuracyThreeKilometers зазвичай найшвидший варіант, достатній для погоди.
-        // kCLLocationAccuracyReduced теж ок, але він дуже неточний (1-20км).
-        // Спробуйте ThreeKilometers для балансу швидкості/точності.
         manager.desiredAccuracy = kCLLocationAccuracyThreeKilometers
     }
     
     func requestLocation(completion: @escaping (Result<CLLocationCoordinate2D, LocationError>) -> Void) {
-        // ЗМІНА 2: Скасовуємо попередній completion, якщо він був, щоб уникнути витоків або подвійних викликів
+        // зберігаємо колбек
         self.locationCompletion = completion
         
-        // ЗМІНА 3: Явно зупиняємо попередні оновлення перед новим запитом
+        //Явно зупиняємо попередні оновлення перед новим запитом
         manager.stopUpdatingLocation()
-        
+        //Запит на дозвіл використання геолокації
         manager.requestWhenInUseAuthorization()
         
         // Перевіряємо статус авторизації
@@ -59,7 +57,8 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     // =============================================================
     // MARK: - CLLocationManagerDelegate
     // =============================================================
-    
+
+    //Викликається коли користувач змінює дозвіл до геолокації
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         switch manager.authorizationStatus {
         case .authorizedWhenInUse, .authorizedAlways:
@@ -79,6 +78,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         }
     }
 
+    //викликається коли локація отримана
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         // Беремо останню (найсвіжішу) локацію з масиву
         guard let location = locations.last else { return }
@@ -99,7 +99,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
              manager.stopUpdatingLocation()
         }
     }
-    
+    //Викликається коли не вдалося отримати локацію
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print("Location Manager Error: \(error.localizedDescription)")
         
