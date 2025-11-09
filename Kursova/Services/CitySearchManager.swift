@@ -1,19 +1,22 @@
-// ViewModel/CitySearchManager.swift
-
 import Foundation
 import MapKit
 import Combine
 
 class CitySearchManager: NSObject, ObservableObject, MKLocalSearchCompleterDelegate {
-    
+
+    //текст що вводить користувач
     @Published var queryFragment: String = ""
+    //Резульати пошуку який змінюється лише в цьому класі але читати можна з будь якої точки програми
     @Published private(set) var results: [CitySearchResult] = []
-    
+
+    //Асистент який шукає міста
     private let completer = MKLocalSearchCompleter()
+    //Зберігаємо підписку на зміну тексту Combine
     private var cancellable: AnyCancellable?
     
     override init() {
         super.init()
+        //Призначаємо делегата до асистента
         completer.delegate = self
         completer.resultTypes = .address // Шукаємо населені пункти
         
@@ -28,7 +31,7 @@ class CitySearchManager: NSObject, ObservableObject, MKLocalSearchCompleterDeleg
                 }
             }
     }
-    
+    //Викликається коли пошук пройшов успішно
     func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
         self.results = completer.results.filter { result in
             // 1. Має бути підзаголовок (країна/регіон)
@@ -43,7 +46,7 @@ class CitySearchManager: NSObject, ObservableObject, MKLocalSearchCompleterDeleg
             CitySearchResult(title: $0.title, subtitle: $0.subtitle)
         }
     }
-    
+    //Викликається коли видається помилка під час пошуку
     func completer(_ completer: MKLocalSearchCompleter, didFailWithError error: Error) {
         // Можна додати обробку помилок, якщо потрібно
         print("Search error: \(error.localizedDescription)")
