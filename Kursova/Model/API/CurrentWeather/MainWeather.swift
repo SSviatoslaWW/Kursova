@@ -17,6 +17,14 @@ struct MainWeather: Decodable {
     
     // Обчислювана властивість: Температура, округлена до цілого, з °C
     var temperatureString: String {
-        return String(format: "%.0f°C", temp)
+        let roundedTemp = temp.rounded() // Заокруглюємо
+        
+        // Перевіряємо, чи стало -0.0
+        if roundedTemp == 0.0 && roundedTemp.sign == .minus {
+            return "0°C" // Примусово повертаємо "0°C"
+        }
+        
+        // Для всіх інших чисел - повертаємо як було
+        return String(format: "%.0f°C", roundedTemp)
     }
 }
