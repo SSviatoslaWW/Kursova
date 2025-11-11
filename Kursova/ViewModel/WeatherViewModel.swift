@@ -181,22 +181,20 @@ class WeatherViewModel: NSObject, ObservableObject {
     }
     
     
-    
+    //фунція моя геолокація
     func forceRefreshUserLocation() {
         isLoading = true
         errorMessage = nil
         
-        // Спробуємо використати "свіжу" кешовану локацію (наприклад, < 5 хвилин)
+        // Спробуємо використати ствру кешовану локацію (наприклад, < 5 хвилин)
         if let lastLocation = locationManager.manager.location,
            Date().timeIntervalSince(lastLocation.timestamp) < 300 {
-            print("🚀 Знайдено свіжу кешовану локацію, використовуємо її.")
             self.fetchWeather(city: nil, lat: lastLocation.coordinate.latitude, lon: lastLocation.coordinate.longitude)
             return
         }
         // Додаємо таймаут на випадок зависання (опціонально, але рекомендовано)
         DispatchQueue.main.asyncAfter(deadline: .now() + 10) { [weak self] in
             if self?.isLoading == true {
-                print("⚠️ Таймаут геолокації.")
                 self?.isLoading = false
                 self?.errorMessage = "Не вдалося швидко визначити місцезнаходження."
             }
@@ -210,10 +208,8 @@ class WeatherViewModel: NSObject, ObservableObject {
             DispatchQueue.main.async {
                 switch result {
                 case .success(let coordinate):
-                    print("📍 Нову геолокацію отримано.")
                     self.fetchWeather(city: nil, lat: coordinate.latitude, lon: coordinate.longitude)
-                case .failure(let error):
-                    print("❌ Помилка: \(error)")
+                case .failure(_):
                     self.errorMessage = "Помилка визначення місцезнаходження."
                     self.isLoading = false
                 }

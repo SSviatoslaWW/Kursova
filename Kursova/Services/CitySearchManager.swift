@@ -53,8 +53,3 @@ class CitySearchManager: NSObject, ObservableObject, MKLocalSearchCompleterDeleg
     }
 }
 
-struct CitySearchResult: Identifiable, Hashable {
-    let id = UUID()
-    let title: String
-    let subtitle: String
-}
