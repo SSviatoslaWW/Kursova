@@ -8,14 +8,14 @@ struct ForecastItemView: View {
     // MARK: - Властивості
     
     let item: ForecastItem // Дані прогнозу
-    // ✅ Змінено: Тепер приймає масив кольорів для градієнту рамки
+    
     let neonGradientColors: [Color]
     
     /// Форматує Unix timestamp у рядок часу (наприклад, "18:00").
     var timeString: String {
         let date = Date(timeIntervalSince1970: TimeInterval(item.dt))
         let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm" // Формат Година:Хвилина
+        formatter.dateFormat = "HH:mm"
         return formatter.string(from: date)
     }
     
@@ -28,7 +28,7 @@ struct ForecastItemView: View {
             Text(timeString)
                 .font(.headline.bold())
                 .foregroundColor(.white.opacity(0.8))
-                .shadow(color: .white.opacity(0.5), radius: 5) // Неоновий ефект
+                .shadow(color: .white.opacity(0.5), radius: 5)
             
             // 2. Іконка Погоди
             if let url = item.weather.first?.iconURL {
@@ -36,7 +36,7 @@ struct ForecastItemView: View {
                     if let image = phase.image {
                         image.resizable()
                             .scaledToFit()
-                            .frame(width: 70, height: 70) // Збільшена іконка
+                            .frame(width: 70, height: 70)
                             .background(.white.opacity(0.3))
                             .clipShape(Circle())
                     } else {
@@ -53,10 +53,10 @@ struct ForecastItemView: View {
             
             // 3. Температура
             Text(item.main.temperatureString)
-                .font(.system(size: 38, weight: .bold)) // Великий шрифт
-                .shadow(color: .white.opacity(0.5), radius: 5) // Неоновий ефект
+                .font(.system(size: 38, weight: .bold))
+                .shadow(color: .white.opacity(0.5), radius: 5)
             
-            // 4. Вітер і Тиск (в одному рядку)
+            // 4. Вітер і Тиск
             VStack {
                 // Вітер
                 if let windData = item.wind {
@@ -72,7 +72,7 @@ struct ForecastItemView: View {
                 
                 // Тиск
                 HStack(spacing: 4) {
-                    Image(systemName: "barometer") // Більш релевантна іконка
+                    Image(systemName: "barometer")
                         .font(.caption)
                     Text("\(item.main.pressure) гПа")
                         .font(.callout.weight(.medium))
@@ -81,29 +81,21 @@ struct ForecastItemView: View {
             }
             .foregroundColor(.white.opacity(0.8))
             
-            // 5. Смуга Вологості (використовуємо нашу нову View)
-            // ✅ Передаємо кольори для градієнта заповнення
+            // 5. Смуга Вологості
             HumidityProgressBar(humidity: item.main.humidity, fillColor: AppColors.indicatorCyan)
             
         }
         .padding(.vertical, 16)
-        
-        // ✅✅✅ --- ОСЬ ЗМІНА --- ✅✅✅
-        // Збільшуємо відступи зліва і справа, щоб картка стала ширшою
         .padding(.horizontal, 40)
-        
-        //.background(.ultraThinMaterial) // Ефект "матового скла"
         .clipShape(RoundedRectangle(cornerRadius: 24)) // Округлені кути
         .overlay( // Неонова рамка
-            AnimatedNeonBorder( // Використовуємо нашу анімовану рамку
+            NeonBorder(
                 shape: RoundedRectangle(cornerRadius: 24),
-                // ✅ Використовуємо передані кольори для градієнта рамки
                 colors: neonGradientColors,
                 lineWidth: 3,
                 blurRadius: 4
             )
         )
-        // ✅ Використовуємо перший колір градієнта для тіні
         .shadow(color: neonGradientColors.first?.opacity(0.3) ?? .white.opacity(0.3), radius: 10, y: 5)
     }
 }

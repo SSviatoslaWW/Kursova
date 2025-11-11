@@ -38,18 +38,18 @@ struct SearchPanel: View {
                     .padding(.horizontal, 20)
                     .foregroundColor(.white)
                     .overlay(
-                        AnimatedNeonBorder(shape: Capsule(), colors: buttonGradientColors, lineWidth: 3, blurRadius: 4)
+                        NeonBorder(shape: Capsule(), colors: buttonGradientColors, lineWidth: 3, blurRadius: 4)
                     )
             }
             .padding(.horizontal)
             .padding(.vertical, 8)
             .overlay(
-                AnimatedNeonBorder(shape: Capsule(), colors: barGradientColors, lineWidth: 4, blurRadius: 5)
+                NeonBorder(shape: Capsule(), colors: barGradientColors, lineWidth: 4, blurRadius: 5)
             )
             .padding(.horizontal)
             
         }
-        .overlay(alignment: .top) { // ⬅️ Overlay вирівняний по верху
+        .overlay(alignment: .top) {
             
             if isFocused && !searchManager.results.isEmpty && !cityInput.isEmpty {
                 ScrollView {
@@ -81,7 +81,7 @@ struct SearchPanel: View {
                     }
                 }
                 .overlay(
-                    AnimatedNeonBorder(
+                    NeonBorder(
                         shape: RoundedRectangle(cornerRadius: 15), // Форма рамки
                         colors: [.cyan, Color(red: 1.0, green: 0, blue: 1.0), .cyan], // Ваші неонові кольори
                         lineWidth: 3, // Товщина лінії

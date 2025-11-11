@@ -42,7 +42,7 @@ struct FavoritesHeaderView: View {
                     .padding(.vertical, 12)
                     .background(
                         ZStack {
-                            AnimatedNeonBorder(
+                            NeonBorder(
                                 shape: RoundedRectangle(cornerRadius: 25.0),
                                 colors: [.cyan, .blue, .purple, .cyan],
                                 lineWidth: 3,

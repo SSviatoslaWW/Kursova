@@ -32,11 +32,13 @@ struct DetailedForecastRow: View {
             // ПРАВА ЧАСТИНА: Іконка та Опис
             HStack(spacing: 12) {
                 Spacer()
-                WeatherIcon(url: item.weather.first?.iconURL)
                 Spacer()
+                Spacer()
+                WeatherIcon(url: item.weather.first?.iconURL)
                 Text(item.weather.first?.description.capitalized ?? "---")
                     .font(.body)
                     .foregroundColor(.white)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
             }
         }
         .padding(.horizontal, 20)
@@ -48,7 +50,7 @@ struct DetailedForecastRow: View {
                     .fill(Color.black.opacity(0.4))
                 
                 // Неонова рамка поверх фону
-                AnimatedNeonBorder(
+                NeonBorder(
                     shape: RoundedRectangle(cornerRadius: 20),
                     colors: [.cyan, .blue, .purple, .cyan], // Можна змінити кольори тут
                     lineWidth: 3,

@@ -19,7 +19,7 @@ struct CityCardRow: View {
                     }
                 }) {
                     ZStack {
-                        AnimatedNeonBorder(
+                        NeonBorder(
                             shape: Circle(),
                             colors: deleteButtonColors,
                             lineWidth: 3,
@@ -76,7 +76,7 @@ struct CityCardRow: View {
                 .padding()
                 .frame(maxWidth: .infinity)
                 .overlay(
-                    AnimatedNeonBorder(
+                    NeonBorder(
                         shape: RoundedRectangle(cornerRadius: 16),
                         colors: cardNeonColors,
                         lineWidth: 5,

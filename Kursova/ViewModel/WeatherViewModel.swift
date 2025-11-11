@@ -5,7 +5,7 @@ import Foundation
 import CoreLocation
 
 class WeatherViewModel: NSObject, ObservableObject {
-
+    
     private let DEFAULT_CITY = "Lviv"
     
     @Published var currentCity: String
@@ -66,47 +66,19 @@ class WeatherViewModel: NSObject, ObservableObject {
             self.fetchWeatherAndForecast(city: city, isSystemReserve: isReserve)
         }
     }
-    
-    func getBackground() -> String {
-        guard let weatherData = currentWeather else {
+    static func getBackground(for mainCondition: String?) -> String {
+        guard let condition = mainCondition else {
             return "ErrorBG"
         }
-        let mainCondition = weatherData.weather.first?.main ?? "Default"
         
-        
-        switch mainCondition {
+        switch condition {
         case "Thunderstorm": return "ThunderstormBG"
         case "Snow": return "SnowBG"
         case "Rain", "Drizzle": return "RainBG"
         default: return "GoodWeatherBG"
         }
     }
-
-    func getBackgroundGradient() -> [Color] {
-        guard let weatherData = currentWeather else {
-            return [Color(red: 0.1, green: 0.1, blue: 0.2), Color(red: 0.3, green: 0.3, blue: 0.4)]
-        }
-        let mainCondition = weatherData.weather.first?.main ?? "Default"
-        //поточна температура
-        let temp = weatherData.main.temp
-        
-        switch mainCondition {
-        case "Thunderstorm": return [Color(red: 0.3, green: 0.1, blue: 0.4), Color(red: 0.1, green: 0.1, blue: 0.15)]
-        case "Snow": return [Color(red: 0.5, green: 0.6, blue: 0.8), Color(red: 0.75, green: 0.8, blue: 0.9)]
-        case "Rain", "Drizzle": return [Color(red: 0.3, green: 0.4, blue: 0.6), Color(red: 0.4, green: 0.5, blue: 0.7)]
-        default: break
-        }
-        
-        if temp >= 30 {
-            return [Color(red: 0.8, green: 0.4, blue: 0.05), Color(red: 0.9, green: 0.7, blue: 0.3)]
-        } else if temp >= 15 {
-            return [Color(red: 0.1, green: 0.5, blue: 0.75), Color(red: 0.5, green: 0.7, blue: 0.9)]
-        } else if temp >= 5 {
-            return [Color(red: 0.4, green: 0.5, blue: 0.6), Color(red: 0.7, green: 0.75, blue: 0.8)]
-        } else {
-            return [Color(red: 0.2, green: 0.2, blue: 0.5), Color(red: 0.4, green: 0.4, blue: 0.7)]
-        }
-    }
+    
     
     //Викликається коли є відомі координати
     private func fetchWeatherAndForecast(lat: Double, lon: Double) {
@@ -213,13 +185,13 @@ class WeatherViewModel: NSObject, ObservableObject {
     func forceRefreshUserLocation() {
         isLoading = true
         errorMessage = nil
-
+        
         // Спробуємо використати "свіжу" кешовану локацію (наприклад, < 5 хвилин)
         if let lastLocation = locationManager.manager.location,
            Date().timeIntervalSince(lastLocation.timestamp) < 300 {
-               print("🚀 Знайдено свіжу кешовану локацію, використовуємо її.")
-               self.fetchWeather(city: nil, lat: lastLocation.coordinate.latitude, lon: lastLocation.coordinate.longitude)
-               return
+            print("🚀 Знайдено свіжу кешовану локацію, використовуємо її.")
+            self.fetchWeather(city: nil, lat: lastLocation.coordinate.latitude, lon: lastLocation.coordinate.longitude)
+            return
         }
         // Додаємо таймаут на випадок зависання (опціонально, але рекомендовано)
         DispatchQueue.main.asyncAfter(deadline: .now() + 10) { [weak self] in
@@ -234,7 +206,7 @@ class WeatherViewModel: NSObject, ObservableObject {
             guard let self = self else { return }
             // Якщо таймаут вже спрацював і вимкнув isLoading, ігноруємо пізній результат
             guard self.isLoading else { return }
-
+            
             DispatchQueue.main.async {
                 switch result {
                 case .success(let coordinate):

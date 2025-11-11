@@ -19,24 +19,6 @@ struct DailyDetailView: View {
         return formatter.string(from: firstItem.date)
     }
 
-    /// Визначає кольори градієнта на основі температури та критичних погодних умов.
-    private func getBackground(for item: ForecastItem?) -> String {
-        guard let weatherData = item else {
-            return "ErrorBG"
-        }
-        
-        let mainCondition = weatherData.weather.first?.main ?? "Default"
-        
-        // 1. КРИТИЧНІ УМОВИ
-        switch mainCondition {
-        case "Thunderstorm": return "ThunderstormBG"
-        case "Snow": return "SnowBG"
-        case "Rain", "Drizzle": return "RainBG"
-        default: return "GoodWeatherBG"
-        }
-
-    }
-    
     
     
     // MARK: - Body View
@@ -46,25 +28,21 @@ struct DailyDetailView: View {
             ZStack {
                 
                 // Фон, що заповнює весь екран
-                Image(getBackground(for: dayForecast.first))
+                Image(WeatherViewModel.getBackground(for: dayForecast.first?.weather.first?.main))
                     .resizable()
                     .scaledToFill()
                     .ignoresSafeArea()
                     .overlay(
                         // Додаємо накладення чорного кольору
                         Color.black
-                        // Встановлюємо прозорість (0.0 = повністю прозорий, 1.0 = повністю чорний)
-                        // Можете погратися з цим значенням, щоб досягти бажаного ефекту
                             .opacity(0.3)
                             .ignoresSafeArea() // Переконайтеся, що накладення теж ігнорує безпечні зони
                     )
                 
                 
                 
-            } // Закриття ZStack
-            //.presentationDetents([.large]) // Повноекранний режим
-            //.presentationDragIndicator(.hidden) // Приховуємо індикатор
-            
+            }
+    
             VStack(spacing: 0) {
                 
                 // ВЕРХНЯ ПАНЕЛЬ

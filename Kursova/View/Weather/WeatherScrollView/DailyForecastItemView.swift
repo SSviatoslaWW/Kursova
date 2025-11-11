@@ -17,7 +17,7 @@ struct DailyForecastItemView: View {
             showingDetail = true
         }) {
             // Головний VStack, що містить Заголовок + Вміст
-            VStack(alignment: .leading, spacing: 8) {
+            LazyVStack(alignment: .leading, spacing: 8) {
                 
                 // 1. ЗАГОЛОВОК: "Нд 2 лист."
                 Text("\(item.dayOfWeekShort) \(item.shortDateString)")
@@ -28,7 +28,7 @@ struct DailyForecastItemView: View {
                 // 2. ГОЛОВНИЙ HSTACK: (Іконка 1 | Велика Temp | Деталі)
                 HStack(spacing: 12) {
                     
-                    // --- КОЛОНКА 1: "іконка... перша" ---
+                    // --- КОЛОНКА 1: "іконка" ---
                     AsyncImage(url: item.weather.first?.iconURL) { phase in
                         if let image = phase.image {
                             image.resizable()
@@ -42,24 +42,24 @@ struct DailyForecastItemView: View {
                     }
                     .frame(width: 70)
                     
-                    // --- КОЛОНКА 2: "велика температура... перша" ---
+                    // --- КОЛОНКА 2: "велика температура" ---
                     Text(item.main.temperatureString)
                         .font(.system(size: 45, weight: .bold))
                         .shadow(color: .white.opacity(0.5), radius: 5) // Неоновий ефект
                         .frame(width: 110, alignment: .center)
                     Spacer()
                     
-                    // --- КОЛОНКА 3: "наступна колонка" (Деталі) ---
+                    // --- КОЛОНКА 3: Деталі ---
                     VStack(alignment: .leading, spacing: 4) {
                         
-                        // 3.2. Рядок: "швидкість... вітру"
+                        // 3.2. Рядок: "швидкість вітру"
                         HStack(spacing: 5) {
                             // Вітер
                             if let windData = item.wind {
                                 HStack(spacing: 4) {
                                     Image(systemName: "wind")
                                         .font(.callout)
-                                    Text(windData.speedString + " " + windData.directionShort)
+                                    Text(windData.speedString)
                                         .font(.footnote.weight(.medium))
                                 }
                             }
@@ -69,14 +69,14 @@ struct DailyForecastItemView: View {
                         // 3.3. Рядок: тиск
                         // Тиск
                         HStack(spacing: 5) {
-                            Image(systemName: "barometer") // Більш релевантна іконка
+                            Image(systemName: "barometer")
                                 .font(.callout)
                             Text("\(item.main.pressure) гПа")
                                 .font(.footnote.weight(.medium))
                         }
                         .foregroundColor(.white.opacity(0.9))
                         
-                        // 3.4. "знизу... смуга з вологістю"
+                        // 3.4. "смуга з вологістю"
                         HumidityProgressBar(humidity: item.main.humidity, fillColor: AppColors.indicatorCyan)
                             .padding(.top, 4)
                         
@@ -90,10 +90,9 @@ struct DailyForecastItemView: View {
             .padding(.horizontal, 16)
             //.background(Color.white.opacity(0.15))
             .cornerRadius(20)
-            .overlay( // Неонова рамка
-                AnimatedNeonBorder( // Використовуємо нашу анімовану рамку
+            .overlay(
+                NeonBorder(
                     shape: RoundedRectangle(cornerRadius: 20),
-                    // ✅ Використовуємо передані кольори для градієнта рамки
                     colors: neonGradientColors,
                     lineWidth: 3,
                     blurRadius: 4
@@ -103,8 +102,6 @@ struct DailyForecastItemView: View {
         } // Закриття Button
         
         // --- МОДАЛЬНЕ ВІКНО ---
-        // Ця логіка залишається без змін, оскільки
-        // для детального екрану потрібні ВСІ дані за день з viewModel.
         .sheet(isPresented: $showingDetail) {
             
             // 1. Отримання ключа дати (початок дня)
@@ -116,7 +113,7 @@ struct DailyForecastItemView: View {
             // 3. Ініціалізація детальної View
             DailyDetailView(
                 dayForecast: itemsForDay,
-                dayName: item.fullDayName // Повна назва дня для заголовка.
+                dayName: item.fullDayName
             )
         }
     }

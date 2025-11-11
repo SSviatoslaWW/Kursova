@@ -2,13 +2,13 @@ import SwiftUI
 
 /// Створює кастомну смугу прогресу для вологості з неоновим заповненням
 struct HumidityProgressBar: View {
-    let humidity: Int // Значення вологості, наприклад 77
+    let humidity: Int 
     let fillColor: Color
         
     var body: some View {
         let humidityFraction = Double(humidity) / 100.0
         
-        VStack(spacing: 4) { // Використовуємо VStack, щоб розмістити текст під смугою
+        VStack(spacing: 4) {
             GeometryReader { geometry in
                 ZStack(alignment: .leading) {
                     // 1. "Доріжка" (фон смуги)
@@ -18,8 +18,7 @@ struct HumidityProgressBar: View {
                     
                     // 2. Просте неонове заповнення
                     Capsule()
-                        .fill(fillColor) // Використовуємо один колір
-                        // Додаємо тінь для "неонового" ефекту
+                        .fill(fillColor)
                         .shadow(color: fillColor.opacity(0.7), radius: 3, x: 0, y: 0)
                         // Обрізаємо заповнення по ширині
                         .frame(width: geometry.size.width * humidityFraction)
@@ -31,7 +30,7 @@ struct HumidityProgressBar: View {
             Text("\(humidity)%")
                 .font(.system(size: 10, weight: .bold))
                 .foregroundColor(.white)
-                .shadow(color: .white.opacity(0.4), radius: 2) // Легке сяйво
+                .shadow(color: .white.opacity(0.4), radius: 2)
         }
     }
 }

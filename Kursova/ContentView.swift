@@ -6,7 +6,21 @@ struct ContentView: View {
     
     // Стан для програмного керування активною вкладкою
     @State private var selectedTab = 0
-    
+    init() {
+        // 1. Створюємо "зовнішній вигляд"
+        let appearance = UITabBarAppearance()
+        
+        // 2. Налаштовуємо його (робимо непрозорим)
+        appearance.configureWithOpaqueBackground()
+        
+        // 3. Встановлюємо колір фону
+        appearance.backgroundColor = UIColor(Color.black.opacity(0.4))
+        
+        // 4. Застосовуємо цей вигляд до обох станів:
+        // (standard - коли скрол є, scrollEdge - коли скролу немає)
+        UITabBar.appearance().standardAppearance = appearance
+        UITabBar.appearance().scrollEdgeAppearance = appearance
+    }
     
     var body: some View {
         ZStack {

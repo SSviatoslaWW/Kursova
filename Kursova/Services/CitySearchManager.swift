@@ -38,7 +38,7 @@ class CitySearchManager: NSObject, ObservableObject, MKLocalSearchCompleterDeleg
             guard !result.subtitle.isEmpty else { return false }
             
             // 2. Відкидаємо явні адміністративні одиниці, якщо вони не схожі на міста
-            // Це евристика: зазвичай міста мають кому в підзаголовку (наприклад, "Каліфорнія, США")
+            // Це евристика: зазвичай міста мають кому в підзаголовку
             let isLikelyCity = result.subtitle.contains(",") || !result.subtitle.contains("Administrative")
             
             return isLikelyCity

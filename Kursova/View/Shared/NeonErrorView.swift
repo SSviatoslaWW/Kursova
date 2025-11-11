@@ -9,13 +9,13 @@ struct NeonErrorView: View {
     
     var body: some View {
         VStack(spacing: 10) {
-            // Велика іконка попередження
+        
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 40))
                 .foregroundColor(.yellow)
                 .shadow(color: .orange, radius: 10) // Неонове світіння іконки
             
-            // Текст помилки
+            
             Text(errorMessage)
                 .font(.headline)
                 .multilineTextAlignment(.center)
@@ -24,11 +24,11 @@ struct NeonErrorView: View {
         }
         .padding(.vertical, 20)
         .padding(.horizontal, 30)
-        .background(Color.black.opacity(0.6)) // Темніший фон для кращого контрасту
+        .background(Color.black.opacity(0.6))
         .cornerRadius(20)
         // Неонова рамка
         .overlay(
-            AnimatedNeonBorder(
+            NeonBorder(
                 shape: RoundedRectangle(cornerRadius: 20),
                 colors: errorGradientColors,
                 lineWidth: 4,
@@ -37,6 +37,6 @@ struct NeonErrorView: View {
         )
         // Центрування на екрані
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-        .padding(.horizontal, 40) // Відступи від країв екрана
+        .padding(.horizontal, 40) 
     }
 }

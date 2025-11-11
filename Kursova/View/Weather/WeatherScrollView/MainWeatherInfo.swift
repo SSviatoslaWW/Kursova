@@ -26,7 +26,7 @@ struct MainWeatherInfo: View {
                     .font(.title3).fontWeight(.medium)
             }
             
-            Spacer() // Розштовхує текст і кнопку по боках
+            Spacer() 
             
             // Права частина (Кнопка "Улюблене")
             Button {
@@ -44,7 +44,7 @@ struct MainWeatherInfo: View {
                 
             } label: {
                 ZStack {
-                    AnimatedNeonBorder(
+                    NeonBorder(
                         shape: Circle(),
                         colors: isFavorite ? AppColors.favoriteActive : AppColors.magentaCyan,
                         lineWidth: 3,

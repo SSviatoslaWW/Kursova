@@ -84,14 +84,11 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         guard let location = locations.last else { return }
         
         // Перевіряємо, чи локація не надто стара (наприклад, старша за 1 хвилину)
-        // Це допомагає уникнути використання дуже старих кешованих даних при запуску
         if Date().timeIntervalSince(location.timestamp) < 60 {
              locationCompletion?(.success(location.coordinate))
              locationCompletion = nil
              manager.stopUpdatingLocation()
         } else {
-            // Якщо локація стара, ми можемо нічого не робити і чекати наступного оновлення,
-            // але requestLocation() зазвичай сам повертає тільки одну свіжу.
             // Про всяк випадок, якщо прийшла стара, можна її все одно повернути,
             // щоб не блокувати користувача вічним очікуванням.
              locationCompletion?(.success(location.coordinate))

@@ -5,8 +5,6 @@ import SwiftUI
 enum AppColors {
     
     // MARK: - Кастомні кольори
-    // Ми визначаємо кастомні кольори тут, щоб не писати
-    // 'Color(red: ...)' по всьому коду.
     
     /// Кастомний яскравий 'magenta'
     static let neonMagenta = Color(red: 1.0, green: 0, blue: 1.0)

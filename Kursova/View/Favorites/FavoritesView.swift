@@ -12,9 +12,9 @@ struct FavoritesView: View {
     // MARK: - Body
     
     var body: some View {
-        GeometryReader {_ in
+        GeometryReader {geo in
             ZStack {
-                Image(weatherVM.getBackground())
+                Image(WeatherViewModel.getBackground(for: weatherVM.currentWeather?.weather.first?.main))
                     .resizable()
                     .scaledToFill()
                     .ignoresSafeArea()
@@ -37,7 +37,9 @@ struct FavoritesView: View {
                 
                 if favoritesVM.favoriteLocations.isEmpty {
                     FavoritesEmptyStateView()
-                    Spacer()
+                        .frame(maxWidth: geo.size.width)
+                        .frame(maxHeight: .infinity)
+                    
                 } else {
                     ScrollView {
                         LazyVStack(spacing: 12) {

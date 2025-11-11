@@ -13,7 +13,7 @@ class FavoritesViewModel: ObservableObject {
     
     @Published private(set) var shouldShowEditButton: Bool = false
     
-    // ЗМІНЕНО: Новий ключ, щоб уникнути конфліктів зі старим [String]
+    // ключ по якому зберігаються дані
     private let key = "FavoriteLocationsList_v2"
     
     // MARK: - Initialization
@@ -24,14 +24,14 @@ class FavoritesViewModel: ObservableObject {
     
     // MARK: - Public Methods
     
-    // ЗМІНЕНО: Логіка перевірки на дублікати
+    //Додавання нового міста
     func addLocation(_ location: FavoriteLocation) {
         
-        // ПЕРЕВІРКА ЛИШЕ ЗА ID:
+        // ПЕРЕВІРКА ЗА ID:
         let alreadyExists = favoriteLocations.contains { $0.id == location.id }
         
         if !alreadyExists {
-            favoriteLocations.append(location) // This will trigger `didSet`.
+            favoriteLocations.append(location)
         }
     }
     
@@ -39,7 +39,7 @@ class FavoritesViewModel: ObservableObject {
         favoriteLocations.remove(atOffsets: offsets)
     }
     
-    // ЗМІНЕНО: Завантаження [FavoriteLocation]
+    //Завантаження [FavoriteLocation]
     private func loadFavorites() {
         guard let data = UserDefaults.standard.data(forKey: key) else {
             self.favoriteLocations = []
@@ -55,7 +55,7 @@ class FavoritesViewModel: ObservableObject {
         }
     }
     
-    // ЗМІНЕНО: Збереження [FavoriteLocation]
+    //Збереження [FavoriteLocation]
     private func saveFavorites() {
         do {
             let data = try JSONEncoder().encode(favoriteLocations)
@@ -64,9 +64,4 @@ class FavoritesViewModel: ObservableObject {
             print("Failed to encode favorite locations: \(error)")
         }
     }
-    
-    
-    
-    
-    
 }
