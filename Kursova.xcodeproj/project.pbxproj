@@ -29,9 +29,23 @@
 		4C9DAC112E9FBACA00CDC0B9 /* KursovaUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KursovaUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		4CC18FA52EC4C076002E9A7A /* Exceptions for "Kursova" folder in "Kursova" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+				Keys.xcconfig,
+			);
+			target = 4C9DABF92E9FBAC800CDC0B9 /* Kursova */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		4C9DABFC2E9FBAC800CDC0B9 /* Kursova */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				4CC18FA52EC4C076002E9A7A /* Exceptions for "Kursova" folder in "Kursova" target */,
+			);
 			path = Kursova;
 			sourceTree = "<group>";
 		};
@@ -171,7 +185,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1640;
-				LastUpgradeCheck = 2600;
+				LastUpgradeCheck = 2610;
 				TargetAttributes = {
 					4C9DABF92E9FBAC800CDC0B9 = {
 						CreatedOnToolsVersion = 16.4;
@@ -271,6 +285,8 @@
 /* Begin XCBuildConfiguration section */
 		4C9DAC192E9FBACA00CDC0B9 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 4C9DABFC2E9FBAC800CDC0B9 /* Kursova */;
+			baseConfigurationReferenceRelativePath = Keys.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -335,6 +351,8 @@
 		};
 		4C9DAC1A2E9FBACA00CDC0B9 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 4C9DABFC2E9FBAC800CDC0B9 /* Kursova */;
+			baseConfigurationReferenceRelativePath = Keys.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -401,6 +419,7 @@
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Kursova/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = LocalCast;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Required for automatic weather detection at your current location";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -433,6 +452,7 @@
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Kursova/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = LocalCast;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Required for automatic weather detection at your current location";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

@@ -6,8 +6,18 @@ struct Constants {
     
     // MARK: - API Connection Details
     static let baseURL = "https://api.openweathermap.org/data/2.5/"
-
-    static let apiKey = "52a11ec7b3324b99fad034c62a80c731"
+    
+    //static let apiKey = "52a11ec7b3324b99fad034c62a80c731"
+    //спосіб отримати ключ
+    static var apiKey: String {
+        // 1. Спробувати знайти ключ у Info.plist
+        guard let key = Bundle.main.object(forInfoDictionaryKey: "API_KEY") as? String else {
+            // 2. Якщо ключ не знайдено, це критична помилка
+            fatalError("API_KEY не знайдено в Info.plist.")
+        }
+        
+        return key
+    }
     
     static let units = "metric"
     
