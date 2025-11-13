@@ -44,19 +44,17 @@ struct FavoritesView: View {
                     ScrollView {
                         LazyVStack(spacing: 12) {
                             ForEach(favoritesVM.favoriteLocations.indices, id: \.self) { index in
-                                if index < favoritesVM.favoriteLocations.count {
-                                    let location = favoritesVM.favoriteLocations[index]
-                                    
-                                    CityCardRow(
-                                        location: location,
-                                        index: index,
-                                        isEditing: isEditing,
-                                        favoritesVM: favoritesVM,
-                                        onSelect: {
-                                            onCitySelect(location)
-                                        }
-                                    )
-                                }
+                                let location = favoritesVM.favoriteLocations[index]
+                                
+                                CityCardRow(
+                                    location: location,
+                                    index: index,
+                                    isEditing: isEditing,
+                                    favoritesVM: favoritesVM,
+                                    onSelect: {
+                                        onCitySelect(location)
+                                    }
+                                )
                             }
                         }
                         .padding(.horizontal, 16)

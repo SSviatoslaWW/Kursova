@@ -14,7 +14,7 @@ struct ContentView: View {
         appearance.configureWithOpaqueBackground()
         
         // 3. Встановлюємо колір фону
-        appearance.backgroundColor = UIColor(Color.black.opacity(0.4))
+        appearance.backgroundColor = UIColor(AppColors.tab)
         
         // 4. Застосовуємо цей вигляд до обох станів:
         // (standard - коли скрол є, scrollEdge - коли скролу немає)

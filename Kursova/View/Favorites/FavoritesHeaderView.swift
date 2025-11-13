@@ -41,14 +41,12 @@ struct FavoritesHeaderView: View {
                     .padding(.horizontal, 20)
                     .padding(.vertical, 12)
                     .background(
-                        ZStack {
-                            NeonBorder(
-                                shape: RoundedRectangle(cornerRadius: 25.0),
-                                colors: [.cyan, .blue, .purple, .cyan],
-                                lineWidth: 3,
-                                blurRadius: 6
-                            )
-                        }
+                        NeonBorder(
+                            shape: RoundedRectangle(cornerRadius: 25.0),
+                            colors: AppColors.oceanCool,
+                            lineWidth: 3,
+                            blurRadius: 6
+                        )
                     )
                     .cornerRadius(25.0)
                     .shadow(color: .black.opacity(0.4), radius: 8, x: 0, y: 4)

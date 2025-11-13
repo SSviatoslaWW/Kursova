@@ -52,7 +52,7 @@ struct DetailedForecastRow: View {
                 // Неонова рамка поверх фону
                 NeonBorder(
                     shape: RoundedRectangle(cornerRadius: 20),
-                    colors: [.cyan, .blue, .purple, .cyan], // Можна змінити кольори тут
+                    colors: AppColors.oceanCool,
                     lineWidth: 3,
                     blurRadius: 6
                 )

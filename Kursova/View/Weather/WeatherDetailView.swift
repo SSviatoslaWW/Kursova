@@ -24,7 +24,7 @@ struct WeatherDetailView: View {
                     .overlay(
                         Color.black
                             .opacity(0.5)
-                            .ignoresSafeArea() // Переконайтеся, що накладення теж ігнорує безпечні зони
+                            .ignoresSafeArea()
                     )
             }
             // Основний контент

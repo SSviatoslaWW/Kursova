@@ -10,8 +10,6 @@ enum LocationError: Error {
 
 class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     
-    // Робимо manager доступним для читання ззовні (для доступу до .location)
-    // або можна залишити private і додати публічний метод getLastLocation()
     let manager = CLLocationManager()
     
     private var locationCompletion: ((Result<CLLocationCoordinate2D, LocationError>) -> Void)?
@@ -85,12 +83,6 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         
         // Перевіряємо, чи локація не надто стара (наприклад, старша за 1 хвилину)
         if Date().timeIntervalSince(location.timestamp) < 60 {
-             locationCompletion?(.success(location.coordinate))
-             locationCompletion = nil
-             manager.stopUpdatingLocation()
-        } else {
-            // Про всяк випадок, якщо прийшла стара, можна її все одно повернути,
-            // щоб не блокувати користувача вічним очікуванням.
              locationCompletion?(.success(location.coordinate))
              locationCompletion = nil
              manager.stopUpdatingLocation()

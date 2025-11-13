@@ -10,7 +10,10 @@ struct WeatherIcon: View {
             if let url = url {
                 AsyncImage(url: url) { phase in
                     if let image = phase.image {
-                        image.resizable().frame(width: 50, height: 50).background(.ultraThinMaterial)
+                        image
+                            .resizable()
+                            .frame(width: 50, height: 50)
+                            .background(.ultraThinMaterial)
                             .clipShape(Circle())
                     } else {
                         ProgressView().frame(width: 30, height: 30).tint(.white)

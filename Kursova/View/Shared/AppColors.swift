@@ -36,9 +36,6 @@ enum AppColors {
     
     /// Використання: Картка улюбленого міста.
     static let cyanPurple: [Color] = [.cyan, .purple, .cyan]
-    
-    
-    // MARK: - Градієнти Станів (Error, Delete, Favorite)
 
     /// Градієнт для повідомлень про помилки.
     static let error: [Color] = [.yellow, .orange, .red, .orange, .yellow]
@@ -48,4 +45,18 @@ enum AppColors {
     
     /// Градієнт для кнопки "Улюблене" (активна).
     static let favoriteActive: [Color] = [favoriteYellow, .orange, favoriteYellow]
+    
+    //колір для divider
+    static let divider: [Color] = [.cyan, .purple]
+    
+    //Шапка випадаючого списку рамка
+    static let dropDownListBorder: [Color] = [.cyan, Color(red: 1.0, green: 0, blue: 1.0), .cyan]
+    
+    //Фон випадаючого списку
+    static let backroundDropDownList: [Color] = [Color(red: 0.1, green: 0.05, blue: 0.2).opacity(0.95),
+                                                 Color.black.opacity(0.98),
+                                                 Color(red: 0.05, green: 0.1, blue: 0.2).opacity(0.95)]
+    
+    //Колрі tab на старих версіях
+    static let tab: Color = Color.black.opacity(0.4)
 }

@@ -15,7 +15,7 @@ struct MainWeather: Decodable {
         case tempMax = "temp_max"
     }
     
-    // Обчислювана властивість: Температура, округлена до цілого, з °C
+    // Обчислювана властивість: Температура, округлена до цілого
     var temperatureString: String {
         let roundedTemp = temp.rounded() // Заокруглюємо
         

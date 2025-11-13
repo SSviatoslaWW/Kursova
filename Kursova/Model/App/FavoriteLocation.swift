@@ -4,7 +4,6 @@ import Foundation
 struct FavoriteLocation: Codable, Identifiable, Equatable {
     
     let id: Int
-    
     let name: String
     let country: String 
     let lat: Double

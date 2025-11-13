@@ -52,35 +52,70 @@ struct DailyForecastItemView: View {
                     // --- КОЛОНКА 3: Деталі ---
                     VStack(alignment: .leading, spacing: 4) {
                         
-                        // 3.2. Рядок: "швидкість вітру"
-                        HStack(spacing: 5) {
-                            // Вітер
-                            if let windData = item.wind {
-                                HStack(spacing: 4) {
-                                    Image(systemName: "wind")
+                        // 1. АДАПТИВНИЙ БЛОК ДЛЯ ВІТРУ ТА ТИСКУ
+                        // ViewThatFits спробує спочатку Варіант 1 (HStack).
+                        // Якщо він не поміститься, він використає Варіант 2 (VStack).
+                        ViewThatFits {
+                            
+                            // --- ВАРІАНТ 1: Горизонтальний ---
+                            HStack(spacing: 12) {
+                                // Рядок "швидкість вітру"
+                                HStack(spacing: 5) {
+                                    if let windData = item.wind {
+                                        HStack(spacing: 4) {
+                                            Image(systemName: "wind")
+                                                .font(.callout)
+                                            Text(windData.speedString)
+                                                .font(.footnote.weight(.medium))
+                                        }
+                                    }
+                                }
+                                .foregroundColor(.white.opacity(0.9))
+                                
+                                Spacer()
+                                // Рядок: тиск
+                                HStack(spacing: 5) {
+                                    Image(systemName: "barometer")
                                         .font(.callout)
-                                    Text(windData.speedString)
+                                    Text("\(item.main.pressure) гПа")
                                         .font(.footnote.weight(.medium))
                                 }
+                                .foregroundColor(.white.opacity(0.9))
                             }
-                        }
-                        .foregroundColor(.white.opacity(0.9))
+                            
+                            // --- ВАРІАНТ 2: Вертикальний ---
+                            VStack(alignment: .leading, spacing: 4) {
+                                
+                                // Рядок: "швидкість вітру"
+                                HStack(spacing: 5) {
+                                    if let windData = item.wind {
+                                        HStack(spacing: 4) {
+                                            Image(systemName: "wind")
+                                                .font(.callout)
+                                            Text(windData.speedString)
+                                                .font(.footnote.weight(.medium))
+                                        }
+                                    }
+                                }
+                                .foregroundColor(.white.opacity(0.9))
+                                
+                                // Рядок: тиск
+                                HStack(spacing: 5) {
+                                    Image(systemName: "barometer")
+                                        .font(.callout)
+                                    Text("\(item.main.pressure) гПа")
+                                        .font(.footnote.weight(.medium))
+                                }
+                                .foregroundColor(.white.opacity(0.9))
+                            }
+                            
+                        } // Кінець ViewThatFits
                         
-                        // 3.3. Рядок: тиск
-                        // Тиск
-                        HStack(spacing: 5) {
-                            Image(systemName: "barometer")
-                                .font(.callout)
-                            Text("\(item.main.pressure) гПа")
-                                .font(.footnote.weight(.medium))
-                        }
-                        .foregroundColor(.white.opacity(0.9))
-                        
-                        // 3.4. "смуга з вологістю"
+                        // 2. "СМУГА З ВОЛОГІСТЮ" (завжди внизу)
                         HumidityProgressBar(humidity: item.main.humidity, fillColor: AppColors.indicatorCyan)
                             .padding(.top, 4)
                         
-                    }// Кінець VStack (Колонка 3)
+                    } // Кінець головного VStack// Кінець VStack (Колонка 3)
                     
                 } // Кінець Hstack (Головний вміст)
                 
@@ -88,7 +123,6 @@ struct DailyForecastItemView: View {
             .foregroundColor(.white)
             .padding(.vertical, 12)
             .padding(.horizontal, 16)
-            //.background(Color.white.opacity(0.15))
             .cornerRadius(20)
             .overlay(
                 NeonBorder(
@@ -106,10 +140,10 @@ struct DailyForecastItemView: View {
             
             // 1. Отримання ключа дати (початок дня)
             let dateKey = Calendar.current.startOfDay(for: item.date)
-             
+            
             // 2. Отримання згрупованих даних для вибраного дня
             let itemsForDay = viewModel.groupedDailyForecast[dateKey] ?? []
-             
+            
             // 3. Ініціалізація детальної View
             DailyDetailView(
                 dayForecast: itemsForDay,

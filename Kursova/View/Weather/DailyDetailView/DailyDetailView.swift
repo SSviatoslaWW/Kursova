@@ -85,9 +85,7 @@ struct DailyDetailView: View {
                     }
                     .foregroundColor(.white)
                     .padding(.trailing, 16)
-                    // Основний яскравий контур (світіння біля тексту)
                     .shadow(color: .white, radius: 1)
-                    // (Опціонально) Третій шар для ще сильнішого ефекту
                     .shadow(color: .white.opacity(0.5), radius: 10)
                 }
                 .padding(.top, 40)

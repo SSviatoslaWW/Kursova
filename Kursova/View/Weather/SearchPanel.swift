@@ -20,7 +20,8 @@ struct SearchPanel: View {
                 
                 ZStack(alignment: .leading) {
                     if cityInput.isEmpty {
-                        Text("Введіть назву міста...").foregroundColor(.white.opacity(0.6))
+                        Text("Введіть назву міста...")
+                            .foregroundColor(.white.opacity(0.6))
                     }
                     TextField("", text: $cityInput)
                         .foregroundColor(.white)
@@ -38,13 +39,19 @@ struct SearchPanel: View {
                     .padding(.horizontal, 20)
                     .foregroundColor(.white)
                     .overlay(
-                        NeonBorder(shape: Capsule(), colors: buttonGradientColors, lineWidth: 3, blurRadius: 4)
+                        NeonBorder(shape: Capsule(),
+                                   colors: buttonGradientColors,
+                                   lineWidth: 3,
+                                   blurRadius: 4)
                     )
             }
             .padding(.horizontal)
             .padding(.vertical, 8)
             .overlay(
-                NeonBorder(shape: Capsule(), colors: barGradientColors, lineWidth: 4, blurRadius: 5)
+                NeonBorder(shape: Capsule(),
+                           colors: barGradientColors,
+                           lineWidth: 4,
+                           blurRadius: 5)
             )
             .padding(.horizontal)
             
@@ -58,7 +65,6 @@ struct SearchPanel: View {
                             Button {
                                 let cityName = result.title.components(separatedBy: ",").first?.trimmingCharacters(in: .whitespaces) ?? result.title
                                 performSearch(for: cityName)
-                                print(cityName)
                             } label: {
                                 VStack(alignment: .leading) {
                                     Text(result.title)
@@ -74,7 +80,9 @@ struct SearchPanel: View {
                             }
                             Divider()
                                 .background(
-                                    LinearGradient(colors: [.cyan, .purple], startPoint: .leading, endPoint: .trailing)
+                                    LinearGradient(colors: AppColors.divider,
+                                                   startPoint: .leading,
+                                                   endPoint: .trailing)
                                 )
                                 .shadow(color: .purple.opacity(0.8), radius: 2)
                         }
@@ -83,18 +91,14 @@ struct SearchPanel: View {
                 .overlay(
                     NeonBorder(
                         shape: RoundedRectangle(cornerRadius: 15), // Форма рамки
-                        colors: [.cyan, Color(red: 1.0, green: 0, blue: 1.0), .cyan], // Ваші неонові кольори
+                        colors: AppColors.dropDownListBorder, // Ваші неонові кольори
                         lineWidth: 3, // Товщина лінії
                         blurRadius: 5 // Радіус світіння
                     )
                 )
                 .background(
                     LinearGradient(
-                        gradient: Gradient(colors: [
-                            Color(red: 0.1, green: 0.05, blue: 0.2).opacity(0.95), // Дуже темний фіолетовий
-                            Color.black.opacity(0.98),                             // Майже чорний по центру
-                            Color(red: 0.05, green: 0.1, blue: 0.2).opacity(0.95)  // Дуже темний синій внизу
-                        ]),
+                        gradient: Gradient(colors: AppColors.backroundDropDownList),
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
