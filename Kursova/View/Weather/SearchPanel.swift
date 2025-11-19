@@ -58,67 +58,105 @@ struct SearchPanel: View {
         }
         .overlay(alignment: .top) {
             
-            if isFocused && !searchManager.results.isEmpty && !cityInput.isEmpty {
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 0) {
-                        ForEach(searchManager.results) { result in
-                            Button {
-                                let cityName = result.title.components(separatedBy: ",").first?.trimmingCharacters(in: .whitespaces) ?? result.title
-                                performSearch(for: cityName)
-                            } label: {
-                                VStack(alignment: .leading) {
-                                    Text(result.title)
-                                        .foregroundColor(.white).bold()
-                                        .shadow(color: .cyan.opacity(0.8), radius: 2)
-                                    if !result.subtitle.isEmpty {
-                                        Text(result.subtitle).font(.caption).foregroundColor(.gray)
+            // Група об'єднує логіку, щоб ми могли застосувати стиль до результату вибору
+            Group {
+                if !searchManager.results.isEmpty {
+                    // --- ВАРІАНТ 1: СПИСОК ---
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 0) {
+                            ForEach(searchManager.results) { result in
+                                Button {
+                                    performSearch(
+                                        for: result.title,
+                                        lat: result.coordinate.latitude,
+                                        lon: result.coordinate.longitude
+                                    )
+                                } label: {
+                                    VStack(alignment: .leading) {
+                                        Text(result.title)
+                                            .foregroundColor(.white).bold()
+                                            .shadow(color: .cyan.opacity(0.8), radius: 2)
+                                        if !result.subtitle.isEmpty {
+                                            Text(result.subtitle).font(.caption).foregroundColor(.gray)
+                                        }
                                     }
+                                    .padding(.vertical, 12)
+                                    .padding(.horizontal)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
                                 }
-                                .padding(.vertical, 12)
-                                .padding(.horizontal)
-                                .frame(maxWidth: .infinity, alignment: .leading)
+                                Divider()
+                                    .background(
+                                        LinearGradient(colors: AppColors.divider,
+                                                       startPoint: .leading,
+                                                       endPoint: .trailing)
+                                    )
+                                    .shadow(color: .purple.opacity(0.8), radius: 2)
                             }
-                            Divider()
-                                .background(
-                                    LinearGradient(colors: AppColors.divider,
-                                                   startPoint: .leading,
-                                                   endPoint: .trailing)
-                                )
-                                .shadow(color: .purple.opacity(0.8), radius: 2)
                         }
                     }
+                    .scrollDisabled(CGFloat(searchManager.results.count) * 65 < 190)
+                    .frame(height: calculateHeight())
+                    
+                } else if let message = searchManager.statusMessage {
+                    // --- ВАРІАНТ 2: ПОВІДОМЛЕННЯ ---
+                    VStack(spacing: 10) {
+                        Image(systemName: "magnifyingglass.circle")
+                            .font(.largeTitle)
+                            .foregroundColor(.gray)
+                            .padding(.bottom, 5)
+                        Text(message)
+                            .foregroundColor(.white)
+                            .font(.subheadline)
+                    }
+                    // Висота для повідомлення фіксована
+                    .frame(height: 100)
+                    .frame(maxWidth: .infinity)
                 }
-                .overlay(
-                    NeonBorder(
-                        shape: RoundedRectangle(cornerRadius: 15), // Форма рамки
-                        colors: AppColors.dropDownListBorder, // Ваші неонові кольори
-                        lineWidth: 3, // Товщина лінії
-                        blurRadius: 5 // Радіус світіння
-                    )
-                )
-                .background(
-                    LinearGradient(
-                        gradient: Gradient(colors: AppColors.backroundDropDownList),
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .cornerRadius(15)
-                .frame(height: 200)
-                .padding(.horizontal, 20) // Відступи, щоб відповідати ширині поля
-                .offset(y: 60)
-                .transition(.opacity)
             }
+            .overlay(
+                NeonBorder(
+                    shape: RoundedRectangle(cornerRadius: 15),
+                    colors: AppColors.dropDownListBorder,
+                    lineWidth: 3,
+                    blurRadius: 5
+                )
+            )
+            .background(
+                LinearGradient(
+                    gradient: Gradient(colors: AppColors.backroundDropDownList),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .cornerRadius(15)
+            .padding(.horizontal, 20)
+            .offset(y: 60) // Тепер це працює і для повідомлення!
+            .transition(.opacity)
         }
     }
     
-    private func performSearch(for city: String) {
+    // Додаємо optional lat і lon
+    private func performSearch(for city: String, lat: Double? = nil, lon: Double? = nil) {
         if !city.isEmpty {
             cityInput = city
-            viewModel.fetchWeather(city: city, lat: nil, lon: nil)
+            // Передаємо координати, якщо вони є (а вони будуть завдяки нашому менеджеру)
+            viewModel.fetchWeather(city: city, lat: lat, lon: lon)
+            
             isFocused = false
             UIApplication.shared.endEditing()
             cityInput = ""
         }
+    }
+    
+    // Розрахунок висоти
+    private func calculateHeight() -> CGFloat {
+        // Приблизна висота одного рядка (текст + підзаголовок + відступи + розділювач)
+        let rowHeight: CGFloat = 65
+        
+        // Рахуємо загальну висоту: к-сть елементів * висоту рядка
+        let contentHeight = CGFloat(searchManager.results.count) * rowHeight
+        
+        // Повертаємо менше з двох: або реальна висота, або ліміт 190
+        return min(contentHeight, 190)
     }
 }

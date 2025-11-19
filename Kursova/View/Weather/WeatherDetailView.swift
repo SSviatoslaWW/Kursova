@@ -34,13 +34,28 @@ struct WeatherDetailView: View {
                 SearchPanel(viewModel: viewModel, cityInput: $cityInput, searchManager: searchManager)
                     .zIndex(2)
                 
-                // Індикатор завантаження або повідомлення про помилку
-                StatusAndErrorView(viewModel: viewModel)
-                
-                // Основний скрол з даними про погоду
-                WeatherScrollView(viewModel: viewModel, favoritesVM: favoritesVM, geometry: geometry)
+                // 2. Умова: АБО статус, АБО погода
+                if viewModel.isLoading || viewModel.errorMessage != nil {
+                    
+                    // ВАРІАНТ А: Йде завантаження або помилка
+                    StatusAndErrorView(viewModel: viewModel)
+                        .transition(.opacity) // Плавна поява
+                    
+                    // Важливо: Додаємо Spacer, щоб заповнити порожнє місце знизу,
+                    // інакше SearchPanel може "з'їхати" вниз по центру екрану.
+                    Spacer()
+                    
+                } else {
+                    
+                    // ВАРІАНТ Б: Показуємо погоду (тільки коли немає завантаження і помилок)
+                    WeatherScrollView(viewModel: viewModel, favoritesVM: favoritesVM, geometry: geometry)
+                        .transition(.opacity) // Плавна поява
+                }
             }
             .foregroundColor(.white)
+            // Анімація перемикання між станами (щоб не було різкого блимання)
+            .animation(.easeInOut, value: viewModel.isLoading)
+            .animation(.easeInOut, value: viewModel.errorMessage)
             .frame(height: geometry.size.height)
             
         }
