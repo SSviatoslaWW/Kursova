@@ -15,6 +15,7 @@ class WeatherViewModel: NSObject, ObservableObject {
     @Published var groupedDailyForecast: [Date: [ForecastItem]] = [:] //детальний прогноз по дням для модалки
     @Published var isLoading = false // перевірка чи йде завантаження
     @Published var errorMessage: String? //текст помилки для відображеня
+    @Published var showSettingsAlert = false //для алерту коли немаж доступу до гелокації
     
     private let service = WeatherService()
     public var locationManager: LocationManager
@@ -209,9 +210,15 @@ class WeatherViewModel: NSObject, ObservableObject {
                 switch result {
                 case .success(let coordinate):
                     self.fetchWeather(city: nil, lat: coordinate.latitude, lon: coordinate.longitude)
-                case .failure(_):
-                    self.errorMessage = "Помилка визначення місцезнаходження."
+                case .failure(let error):
                     self.isLoading = false
+                    if error == .accessDenied {
+                        // Якщо доступ заборонено — вмикаємо алерт налаштувань
+                        self.showSettingsAlert = true
+                    } else {
+                        // Інші помилки показуємо як звичайне повідомлення
+                        self.errorMessage = "Помилка визначення місцезнаходження."
+                    }
                 }
             }
         }

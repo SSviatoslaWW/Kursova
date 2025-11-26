@@ -57,6 +57,21 @@ struct WeatherDetailView: View {
             .animation(.easeInOut, value: viewModel.isLoading)
             .animation(.easeInOut, value: viewModel.errorMessage)
             .frame(height: geometry.size.height)
+            .alert("Геолокація недоступна", isPresented: $viewModel.showSettingsAlert) {
+                
+                // Кнопка 1: Відкрити налаштування
+                Button("Налаштування") {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                }
+                
+                // Кнопка 2: Скасувати
+                Button("Скасувати", role: .cancel) { }
+                
+            } message: {
+                Text("Щоб бачити погоду у вашому регіоні, будь ласка, надайте дозвіл на використання геолокації в налаштуваннях пристрою.")
+            }
             
         }
         .onAppear {
