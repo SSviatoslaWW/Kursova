@@ -15,7 +15,7 @@ struct DetailedForecastRow: View {
     }
 
     var body: some View {
-        HStack {
+        HStack (spacing: 0) {
             // ЛІВА ЧАСТИНА: Час та Температура
             VStack(alignment: .leading, spacing: 4) {
                 Text(timeString)
@@ -26,20 +26,19 @@ struct DetailedForecastRow: View {
                     .font(.system(size: 28, weight: .bold)) // Збільшений шрифт як на макеті
                     .foregroundColor(.white)
             }
+            .frame(width: 80, alignment: .leading)
             
             Spacer()
             
             // ПРАВА ЧАСТИНА: Іконка та Опис
             HStack(spacing: 12) {
-                Spacer()
-                Spacer()
-                Spacer()
-                WeatherIcon(url: item.weather.first?.iconURL)
+                SmartWeatherIcon(iconCode: item.weather.first?.icon, size: 60)
                 Text(item.weather.first?.description.capitalized ?? "---")
                     .font(.body)
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity, alignment: .trailing)
             }
+            .frame(alignment: .trailing)
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)

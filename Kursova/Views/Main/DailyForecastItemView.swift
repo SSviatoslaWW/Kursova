@@ -27,20 +27,14 @@ struct DailyForecastItemView: View {
                 
                 // 2. ГОЛОВНИЙ HSTACK: (Іконка 1 | Велика Temp | Деталі)
                 HStack(spacing: 12) {
-                    
                     // --- КОЛОНКА 1: "іконка" ---
-                    AsyncImage(url: item.weather.first?.iconURL) { phase in
-                        if let image = phase.image {
-                            image.resizable()
-                                .scaledToFit()
-                                .frame(width: 70, height: 70)
-                                .background(.white.opacity(0.5))
-                                .clipShape(Circle())
-                        } else {
-                            ProgressView().frame(width: 50, height: 50).tint(.white)
-                        }
-                    }
-                    .frame(width: 70)
+                    // Використовуємо нову в'юху. Передаємо код іконки (String), а не URL.
+                    SmartWeatherIcon(iconCode: item.weather.first?.icon, size: 70)
+                        // Ті самі модифікатори фону та форми, що були у тебе раніше,
+                        // застосовуємо зовні до нашої нової в'юхи.
+                        .background(.white.opacity(0.5))
+                        .clipShape(Circle())
+                        .frame(width: 70) // Фіксуємо ширину колонки
                     
                     // --- КОЛОНКА 2: "велика температура" ---
                     Text(item.main.temperatureString)

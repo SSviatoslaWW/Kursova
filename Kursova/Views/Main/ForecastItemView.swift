@@ -31,25 +31,9 @@ struct ForecastItemView: View {
                 .shadow(color: .white.opacity(0.5), radius: 5)
             
             // 2. Іконка Погоди
-            if let url = item.weather.first?.iconURL {
-                AsyncImage(url: url) { phase in
-                    if let image = phase.image {
-                        image.resizable()
-                            .scaledToFit()
-                            .frame(width: 70, height: 70)
-                            .background(.white.opacity(0.3))
-                            .clipShape(Circle())
-                    } else {
-                        ProgressView()
-                            .frame(width: 70, height: 70)
-                            .tint(.white)
-                    }
-                }
-            } else {
-                // Заглушка на випадок, якщо URL немає
-                Image(systemName: "icloud.slash")
-                    .frame(width: 70, height: 70)
-            }
+            SmartWeatherIcon(iconCode: item.weather.first?.icon, size: 70)
+                .background(.white.opacity(0.3)) // Твій стиль фону
+                .clipShape(Circle())             // Твоя форма
             
             // 3. Температура
             Text(item.main.temperatureString)
