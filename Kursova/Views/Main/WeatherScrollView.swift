@@ -10,7 +10,7 @@ struct WeatherScrollView: View {
             
             if let weather = viewModel.currentWeather {
                 VStack(spacing: 30) {
-                    MainWeatherInfo(weather: weather, favoritesVM: favoritesVM)
+                    MainWeatherInfo(weather: weather,cityName: viewModel.currentCity, favoritesVM: favoritesVM)
                     HorizontalForecastSection(viewModel: viewModel)
                     DailyForecastSection(viewModel: viewModel)
                 }

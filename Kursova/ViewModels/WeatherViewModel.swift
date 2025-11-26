@@ -104,7 +104,11 @@ class WeatherViewModel: NSObject, ObservableObject {
             switch currentResult {
             case .success(let response):
                 self.currentWeather = response
-                self.currentCity = response.name
+                if let explicitCityName = city, !explicitCityName.isEmpty {
+                    self.currentCity = explicitCityName
+                } else {
+                    self.currentCity = response.name
+                }
                 self.isInitialLoad = false
                 self.fetchForecast(city: self.currentCity, lat: response.coord.lat, lon: response.coord.lon)
                 

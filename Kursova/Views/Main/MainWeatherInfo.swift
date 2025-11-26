@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MainWeatherInfo: View {
     let weather: CurrentWeatherResponse
+    let cityName: String
     @ObservedObject var favoritesVM: FavoritesViewModel
     
     let favoriteColor = AppColors.favoriteYellow
@@ -12,7 +13,7 @@ struct MainWeatherInfo: View {
         HStack(alignment: .center) {
             // Ліва частина (Інформація про погоду)
             VStack(alignment: .leading, spacing: 8) {
-                Text(weather.name)
+                Text(cityName)
                     .font(.largeTitle).bold()
                     .shadow(color: Color.white.opacity(0.5), radius: 7, x: 0, y: 0)
                 
