@@ -31,7 +31,6 @@ class WeatherViewModel: NSObject, ObservableObject {
     
     //пошук користувацьої локації
     func requestUserLocation() {
-        // Запобігаємо повторному запиту, якщо погода вже завантажена
         guard isInitialLoad else { return }
         
         locationManager.requestLocation { [weak self] result in
@@ -40,8 +39,14 @@ class WeatherViewModel: NSObject, ObservableObject {
             DispatchQueue.main.async {
                 switch result {
                 case .success(let coordinate):
-                    // Тепер цей виклик працюватиме коректно
-                    self.fetchWeather(city: nil, lat: coordinate.latitude, lon: coordinate.longitude)
+                    let lat = coordinate.latitude
+                    let lon = coordinate.longitude
+                    
+                    self.resolveCityName(latitude: lat, longitude: lon) { cityName in
+                        DispatchQueue.main.async {
+                            self.fetchWeather(city: cityName, lat: lat, lon: lon)
+                        }
+                    }
                     
                 case .failure:
                     if self.isInitialLoad {
@@ -52,6 +57,7 @@ class WeatherViewModel: NSObject, ObservableObject {
         }
     }
     
+    
     // пошук погоди за координатами та містом
     func fetchWeather(city: String?, lat: Double?, lon: Double?) {
         self.isUserSearch = (city != self.DEFAULT_CITY && city != nil && lat == nil && lon == nil)
@@ -60,8 +66,13 @@ class WeatherViewModel: NSObject, ObservableObject {
         self.errorMessage = nil
         
         if let lat = lat, let lon = lon {
-            self.fetchWeatherAndForecast(lat: lat, lon: lon)
-        } else if let city = city, !city.isEmpty {
+            self.fetchWeatherAndForecast(
+                lat: lat,
+                lon: lon,
+                explicitCityName: city
+            )
+        }
+        else if let city = city, !city.isEmpty {
             self.currentCity = city
             let isReserve = (city == self.DEFAULT_CITY)
             self.fetchWeatherAndForecast(city: city, isSystemReserve: isReserve)
@@ -82,11 +93,23 @@ class WeatherViewModel: NSObject, ObservableObject {
     
     
     //Викликається коли є відомі координати
-    private func fetchWeatherAndForecast(lat: Double, lon: Double) {
+    private func fetchWeatherAndForecast(
+        lat: Double,
+        lon: Double,
+        explicitCityName: String? = nil
+    ) {
         service.fetchCurrentWeather(lat: lat, lon: lon) { [weak self] currentResult in
-            self?.handleFetchResults(currentResult: currentResult, isLocationAttempt: true, isSystemReserve: false, lat: lat, lon: lon, city: nil)
+            self?.handleFetchResults(
+                currentResult: currentResult,
+                isLocationAttempt: true,
+                isSystemReserve: false,
+                lat: lat,
+                lon: lon,
+                city: explicitCityName   // ← ПЕРЕДАЄМО НАЗВУ
+            )
         }
     }
+    
     
     //викликається коли  відоме місто
     private func fetchWeatherAndForecast(city: String, isSystemReserve: Bool) {
@@ -159,31 +182,41 @@ class WeatherViewModel: NSObject, ObservableObject {
     }
     
     private func filterDailyForecast(_ list: [ForecastItem]) -> [ForecastItem] {
-        var filteredItems: [ForecastItem] = []
-        var seenDates: Set<String> = [] //збереження дат які ми вже додали
-        let calendar = Calendar.current //календар для роботи з датами
-        let dateFormatter = DateFormatter() //перетворення дати в рядок
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-        for item in list {
-            let date = item.date
-            let dateString = dateFormatter.string(from: date)
-            if !calendar.isDateInToday(date) && !seenDates.contains(dateString) {
-                filteredItems.append(item)
-                seenDates.insert(dateString)
-            }
-            if filteredItems.count >= 5 { break }
+        let calendar = Calendar.current
+        
+        let grouped = groupForecastByDay(list)
+        
+        // Беремо дні, починаючи з завтра
+        let sortedDays = grouped.keys
+            .filter { !calendar.isDateInToday($0) }
+            .sorted()
+        
+        // Для кожного дня беремо перший слот 
+        let daily = sortedDays.prefix(5).compactMap { day -> ForecastItem? in
+            grouped[day]?.first
         }
-        return filteredItems
+        
+        return daily
     }
+    
     
     //групує детальний прогноз погоди для модалки
     private func groupForecastByDay(_ list: [ForecastItem]) -> [Date: [ForecastItem]] {
         let calendar = Calendar.current
+        
+        // Групуємо по дню
         let grouped = Dictionary(grouping: list) { item in
             calendar.startOfDay(for: item.date)
         }
-        return grouped
+        
+        // Сортуємо всередині кожного дня по часу, щоб перший був найраніший
+        let sortedGrouped = grouped.mapValues { items in
+            items.sorted { $0.date < $1.date }
+        }
+        
+        return sortedGrouped
     }
+    
     
     
     //фунція моя геолокація
@@ -194,7 +227,14 @@ class WeatherViewModel: NSObject, ObservableObject {
         // Спробуємо використати ствру кешовану локацію (наприклад, < 5 хвилин)
         if let lastLocation = locationManager.manager.location,
            Date().timeIntervalSince(lastLocation.timestamp) < 300 {
-            self.fetchWeather(city: nil, lat: lastLocation.coordinate.latitude, lon: lastLocation.coordinate.longitude)
+            let lat = lastLocation.coordinate.latitude
+            let lon = lastLocation.coordinate.longitude
+            
+            resolveCityName(latitude: lat, longitude: lon) { cityName in
+                DispatchQueue.main.async {
+                    self.fetchWeather(city: cityName, lat: lat, lon: lon)
+                }
+            }
             return
         }
         // Додаємо таймаут на випадок зависання (опціонально, але рекомендовано)
@@ -213,7 +253,15 @@ class WeatherViewModel: NSObject, ObservableObject {
             DispatchQueue.main.async {
                 switch result {
                 case .success(let coordinate):
-                    self.fetchWeather(city: nil, lat: coordinate.latitude, lon: coordinate.longitude)
+                    let lat = coordinate.latitude
+                    let lon = coordinate.longitude
+                    
+                    self.resolveCityName(latitude: lat, longitude: lon) { cityName in
+                        DispatchQueue.main.async {
+                            self.fetchWeather(city: cityName, lat: lat, lon: lon)
+                        }
+                    }
+                    
                 case .failure(let error):
                     self.isLoading = false
                     if error == .accessDenied {
@@ -224,6 +272,23 @@ class WeatherViewModel: NSObject, ObservableObject {
                         self.errorMessage = "Помилка визначення місцезнаходження."
                     }
                 }
+            }
+        }
+    }
+    
+    private func resolveCityName(
+        latitude: Double,
+        longitude: Double,
+        completion: @escaping (String?) -> Void
+    ) {
+        let location = CLLocation(latitude: latitude, longitude: longitude)
+        CLGeocoder().reverseGeocodeLocation(location) { placemarks, error in
+            if let placemark = placemarks?.first {
+                // locality – це зазвичай назва міста
+                let city = placemark.locality
+                completion(city)
+            } else {
+                completion(nil)
             }
         }
     }

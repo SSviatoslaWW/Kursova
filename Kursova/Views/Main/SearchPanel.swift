@@ -130,7 +130,7 @@ struct SearchPanel: View {
             )
             .cornerRadius(15)
             .padding(.horizontal, 20)
-            .offset(y: 60) // Тепер це працює і для повідомлення!
+            .offset(y: 60) 
             .transition(.opacity)
         }
     }

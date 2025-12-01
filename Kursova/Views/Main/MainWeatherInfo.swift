@@ -36,7 +36,7 @@ struct MainWeatherInfo: View {
                 
                 let newFavorite = FavoriteLocation(
                     id: weather.id,
-                    name: weather.name,
+                    name: cityName,
                     country: countryName,
                     lat: weather.coord.lat,
                     lon: weather.coord.lon

@@ -7,7 +7,7 @@ struct ForecastItem: Decodable {
     let weather: [WeatherCondition] // Погодні умови для цього інтервалу
     let wind: Wind?
     
-    // Обчислювана властивість: конвертація Unix timestamp у Date
+    //конвертація Unix timestamp у Date
     var date: Date {
         Date(timeIntervalSince1970: TimeInterval(dt))
     }
