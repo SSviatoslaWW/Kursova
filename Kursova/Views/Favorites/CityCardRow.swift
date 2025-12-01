@@ -12,8 +12,10 @@ struct CityCardRow: View {
     
     var body: some View {
         HStack(spacing: 15) {
-            if isEditing {
+            // Кнопка видалення зліва (режим редагування)
+            ZStack {
                 Button(action: {
+                    guard isEditing else { return }
                     withAnimation(.spring()) {
                         favoritesVM.removeLocation(at: IndexSet(integer: index))
                     }
@@ -33,9 +35,12 @@ struct CityCardRow: View {
                             .shadow(color: .red.opacity(0.8), radius: 5, x: 0, y: 0)
                     }
                 }
-                .transition(.move(edge: .leading).combined(with: .opacity))
             }
+            // 🔑 тут ми керуємо ефектом зміщення картки
+            .frame(width: isEditing ? 50 : 0, height: 50, alignment: .leading)
+            .opacity(isEditing ? 1 : 0)
             
+            // Картка міста
             Button(action: {
                 if !isEditing { onSelect() }
             }) {
@@ -86,5 +91,7 @@ struct CityCardRow: View {
                 .clipShape(RoundedRectangle(cornerRadius: 16))
             }
         }
+        // Плавна анімація переходу в режим редагування
+        .animation(.spring(), value: isEditing)
     }
 }

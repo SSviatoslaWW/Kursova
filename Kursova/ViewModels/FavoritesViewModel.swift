@@ -37,6 +37,8 @@ class FavoritesViewModel: ObservableObject {
         }
     }
     
+    
+    
     func removeLocation(at offsets: IndexSet) {
         favoriteLocations.remove(atOffsets: offsets)
     }

@@ -41,27 +41,31 @@ struct FavoritesView: View {
                         .frame(maxHeight: .infinity)
                     
                 } else {
-                    ScrollView {
-                        LazyVStack(spacing: 12) {
-                            ForEach(favoritesVM.favoriteLocations.indices, id: \.self) { index in
-                                let location = favoritesVM.favoriteLocations[index]
-                                
-                                CityCardRow(
-                                    location: location,
-                                    index: index,
-                                    isEditing: isEditing,
-                                    favoritesVM: favoritesVM,
-                                    onSelect: {
-                                        onCitySelect(location)
-                                    }
-                                )
+                    List {
+                        ForEach(Array(favoritesVM.favoriteLocations.enumerated()), id: \.element.id) { index, location in
+                            CityCardRow(
+                                location: location,
+                                index: index,
+                                isEditing: isEditing,
+                                favoritesVM: favoritesVM,
+                                onSelect: {
+                                    onCitySelect(location)
+                                }
+                            )
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
+                        }
+                        .onDelete { offsets in
+                            withAnimation(.spring()) {
+                                favoritesVM.removeLocation(at: offsets)
                             }
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.top, 10)
                     }
                     .scrollBounceBehavior(.basedOnSize)
+                    .listStyle(.plain)
+                    .scrollContentBackground(.hidden) // щоб був видимий твій background
                 }
+                
             }
             .foregroundColor(.white)
             .onChange(of: favoritesVM.favoriteLocations) { oldValue, newValue in
