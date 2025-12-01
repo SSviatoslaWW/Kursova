@@ -20,7 +20,6 @@ struct DailyDetailView: View {
     }
 
     
-    
     // MARK: - Body View
     
     var body: some View {

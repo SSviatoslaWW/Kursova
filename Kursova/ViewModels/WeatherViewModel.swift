@@ -183,40 +183,41 @@ class WeatherViewModel: NSObject, ObservableObject {
     
     private func filterDailyForecast(_ list: [ForecastItem]) -> [ForecastItem] {
         let calendar = Calendar.current
-        
+
+        // Використовуємо те саме групування
         let grouped = groupForecastByDay(list)
-        
-        // Беремо дні, починаючи з завтра
+
+        // Беремо дні, починаючи з завтра (сьогодні пропускаємо)
         let sortedDays = grouped.keys
             .filter { !calendar.isDateInToday($0) }
             .sorted()
-        
-        // Для кожного дня беремо перший слот 
+
+        // Для кожного дня беремо ПЕРШИЙ слот
         let daily = sortedDays.prefix(5).compactMap { day -> ForecastItem? in
             grouped[day]?.first
         }
-        
+
         return daily
     }
+
     
     
     //групує детальний прогноз погоди для модалки
     private func groupForecastByDay(_ list: [ForecastItem]) -> [Date: [ForecastItem]] {
         let calendar = Calendar.current
-        
+
         // Групуємо по дню
         let grouped = Dictionary(grouping: list) { item in
             calendar.startOfDay(for: item.date)
         }
-        
-        // Сортуємо всередині кожного дня по часу, щоб перший був найраніший
+
+        // Сортуємо всередині кожного дня по часу
         let sortedGrouped = grouped.mapValues { items in
             items.sorted { $0.date < $1.date }
         }
-        
+
         return sortedGrouped
     }
-    
     
     
     //фунція моя геолокація
