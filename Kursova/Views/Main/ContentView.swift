@@ -43,7 +43,7 @@ struct ContentView: View {
                     // Передаємо замикання, яке буде викликано при виборі міста
                     onCitySelect: { selectedCity in
                         // Завантажeння погоди
-                        weatherVM.fetchWeather(city: selectedCity.name, lat: nil, lon: nil)
+                        weatherVM.fetchWeather(city: selectedCity.name, lat: selectedCity.lat, lon: selectedCity.lon)
                         //Перемикаємо на вкладку погоди
                         selectedTab = 0
                     },

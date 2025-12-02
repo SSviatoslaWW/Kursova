@@ -94,6 +94,7 @@ struct SearchPanel: View {
                             }
                         }
                     }
+                    .scrollBounceBehavior(.basedOnSize)
                     .scrollDisabled(CGFloat(searchManager.results.count) * 65 < 190)
                     .frame(height: calculateHeight())
                     
