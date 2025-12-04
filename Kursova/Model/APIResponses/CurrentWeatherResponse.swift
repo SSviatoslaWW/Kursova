@@ -4,7 +4,6 @@ import Foundation
 struct CurrentWeatherResponse: Decodable {
     let coord: Coordinates
     let weather: [WeatherCondition] // Масив основних умов (опис, іконка)
-    let base: String
     let main: MainWeather       // Об'єкт з температурою та тиском
     let visibility: Int?        // Видимість (метри)
     let wind: Wind?

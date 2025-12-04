@@ -1,7 +1,6 @@
 import Foundation
 import Combine
 
-/// Manages the list of favorite cities and their persistence.
 class FavoritesViewModel: ObservableObject {
     
     @Published var favoriteLocations: [FavoriteLocation] = [] {
@@ -22,8 +21,6 @@ class FavoritesViewModel: ObservableObject {
         loadFavorites()
     }
     
-    // MARK: - Public Methods
-    
     //Додавання нового міста
     func addLocation(_ location: FavoriteLocation) {
         
@@ -41,7 +38,7 @@ class FavoritesViewModel: ObservableObject {
     }
     
     
-    
+    //видалення зі списку
     func removeLocation(at offsets: IndexSet) {
         favoriteLocations.remove(atOffsets: offsets)
     }

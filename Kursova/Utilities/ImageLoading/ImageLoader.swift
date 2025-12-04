@@ -7,13 +7,14 @@ class ImageLoader: ObservableObject {
     @Published var isLoading = false
     
     private let url: URL?
+    //зберігає посилання на запит
     private var cancellable: AnyCancellable?
 
     init(url: URL?) {
         self.url = url
     }
     
-    // Скасовуємо запит, якщо об'єкт лоадера знищується (наприклад, в'юха зникає з екрана)
+    // Скасовуємо запит, якщо об'єкт лоадера знищується
     deinit {
         cancel()
     }

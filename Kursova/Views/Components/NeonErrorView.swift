@@ -4,7 +4,6 @@ import SwiftUI
 struct NeonErrorView: View {
     let errorMessage: String
     
-    // Неонові кольори для помилки (жовто-червоні)
     let errorGradientColors: [Color] = AppColors.error
     
     var body: some View {

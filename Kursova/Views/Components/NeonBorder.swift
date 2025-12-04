@@ -1,6 +1,5 @@
 import SwiftUI
 
-/// Створює ЯСКРАВУ неонову рамку з кольорами, що "біжать" по колу.
 struct NeonBorder<S: Shape>: View {
     let shape: S
     let colors: [Color]
@@ -21,7 +20,7 @@ struct NeonBorder<S: Shape>: View {
         ZStack {
             // Шар 1: Широке "сяйво" (haze)
             shape
-                .stroke(gradient, lineWidth: lineWidth)
+                .stroke(gradient, lineWidth: lineWidth) //обведення
                 .blur(radius: blurRadius)
             
             // Шар 2: Яскрава "серцевина" (hot core)

@@ -1,31 +1,16 @@
-// View/ForecastItemView.swift
-
 import SwiftUI
 
-/// Структура відображає одну картку прогнозу в стилі "неонового скла".
 struct ForecastItemView: View {
-    
-    // MARK: - Властивості
     
     let item: ForecastItem // Дані прогнозу
     
     let neonGradientColors: [Color]
-    
-    /// Форматує Unix timestamp у рядок часу (наприклад, "18:00").
-    var timeString: String {
-        let date = Date(timeIntervalSince1970: TimeInterval(item.dt))
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm"
-        return formatter.string(from: date)
-    }
-    
-    // MARK: - Body View
-    
+
     var body: some View {
         VStack(spacing: 12) {
             
             // 1. Час
-            Text(timeString)
+            Text(item.timeString)
                 .font(.headline.bold())
                 .foregroundColor(.white.opacity(0.8))
                 .shadow(color: .white.opacity(0.5), radius: 5)

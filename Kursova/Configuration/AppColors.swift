@@ -1,17 +1,11 @@
 import SwiftUI
 
 enum AppColors {
-    
-    // MARK: - Кастомні кольори
-    
     /// Кастомний яскравий 'magenta'
     static let neonMagenta = Color(red: 1.0, green: 0, blue: 1.0)
     
     /// Кастомний 'sky blue'
     static let neonSkyBlue = Color(red: 0.5, green: 0.8, blue: 1.0)
-    
-    
-    // MARK: - Основні кольори UI
     
     /// Жовтий для іконки "Улюблене"
     static let favoriteYellow = Color.yellow
@@ -19,9 +13,6 @@ enum AppColors {
     /// Блакитний для індикаторів (напр. вологість)
     static let indicatorCyan = Color.cyan
 
-    
-    // MARK: - Неонові Градієнти (Палітри)
-    
     /// Використання: Панель пошуку, кнопка "Улюблене" (неактивна).
     static let magentaCyan: [Color] = [.cyan, neonMagenta, .cyan]
     

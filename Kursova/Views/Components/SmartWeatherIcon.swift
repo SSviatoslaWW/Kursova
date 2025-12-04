@@ -1,19 +1,16 @@
 import SwiftUI
 
-// SwiftUI в'юха, яка використовує ImageLoader для відображення іконки з кешуванням.
 struct SmartWeatherIcon: View {
-    // Кожна іконка має свій власний екземпляр лоадера
     @StateObject private var loader: ImageLoader
     
     let size: CGFloat
     let placeholderColor: Color
 
-    // Ініціалізатор приймає код іконки (наприклад "10d"), а не URL.
     init(iconCode: String?, size: CGFloat = 50, placeholderColor: Color = .white.opacity(0.5)) {
         self.size = size
         self.placeholderColor = placeholderColor
         
-        // Формуємо URL за допомогою твого існуючого методу в Constants
+        // Формуємо URL
         var url: URL? = nil
         if let iconCode = iconCode {
             url = Constants.iconURL(iconCode: iconCode)
@@ -38,17 +35,17 @@ struct SmartWeatherIcon: View {
                     .scaleEffect(size > 50 ? 1.0 : 0.7)
             } else {
                 // ВАРІАНТ 3: Помилка або відсутність URL (Плейсхолдер)
-                Image(systemName: "cloud.sun.fill") // Нейтральна іконка погоди
+                Image(systemName: "cloud.sun.fill")
                     .resizable()
                     .scaledToFit()
                     .foregroundColor(placeholderColor)
-                    .padding(size * 0.1) // Невеликий відступ
+                    .padding(size * 0.1) 
             }
         }
         .frame(width: size, height: size)
         // Запускаємо завантаження при появі на екрані
         .onAppear { loader.load() }
-        // Скасовуємо завантаження, якщо в'юха зникає (наприклад, при скролі)
+        // Скасовуємо завантаження, якщо в'юха зникає
         .onDisappear { loader.cancel() }
     }
 }

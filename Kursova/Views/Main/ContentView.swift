@@ -40,7 +40,6 @@ struct ContentView: View {
                 FavoritesView(
                     favoritesVM: favoritesVM,
                     weatherVM: weatherVM,
-                    // Передаємо замикання, яке буде викликано при виборі міста
                     onCitySelect: { selectedCity in
                         // Завантажeння погоди
                         weatherVM.fetchWeather(city: selectedCity.name, lat: selectedCity.lat, lon: selectedCity.lon)
@@ -48,7 +47,7 @@ struct ContentView: View {
                         selectedTab = 0
                     },
                     onClose: {
-                        selectedTab = 0 // Також просто перемикаємось на першу вкладку
+                        selectedTab = 0 
                     }
                 )
                 .tabItem {

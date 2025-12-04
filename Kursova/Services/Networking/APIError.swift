@@ -1,5 +1,3 @@
-// Networking/APIError.swift
-
 import Foundation
 
 enum APIError: Error, LocalizedError, Equatable {

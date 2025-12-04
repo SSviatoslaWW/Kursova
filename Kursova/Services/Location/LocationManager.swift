@@ -4,14 +4,15 @@ import Foundation
 import CoreLocation
 
 enum LocationError: Error {
-    case accessDenied
-    case failed
+    case accessDenied //користувач не дозволив геолокацію
+    case failed //користувач не дозволив геолокацію
 }
 
 class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     
     let manager = CLLocationManager()
     
+    //колбек що викликається коли локація отримана
     private var locationCompletion: ((Result<CLLocationCoordinate2D, LocationError>) -> Void)?
 
     override init() {
@@ -43,7 +44,6 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
             
         case .notDetermined:
             // Чекаємо на рішення користувача (спрацює метод делегата didChangeAuthorization)
-            // Нічого не робимо тут, запит буде в didChangeAuthorization
             break
             
         @unknown default:
@@ -52,9 +52,6 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         }
     }
     
-    // =============================================================
-    // MARK: - CLLocationManagerDelegate
-    // =============================================================
 
     //Викликається коли користувач змінює дозвіл до геолокації
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
@@ -81,7 +78,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         // Беремо останню (найсвіжішу) локацію з масиву
         guard let location = locations.last else { return }
         
-        // Перевіряємо, чи локація не надто стара (наприклад, старша за 1 хвилину)
+        // Перевіряємо, чи локація не надто стара
         if Date().timeIntervalSince(location.timestamp) < 60 {
              locationCompletion?(.success(location.coordinate))
              locationCompletion = nil
@@ -100,5 +97,21 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         locationCompletion?(.failure(.failed))
         locationCompletion = nil
         manager.stopUpdatingLocation()
+    }
+}
+
+
+//Визначення міста за координатами
+extension LocationManager {
+    
+    func resolveCityName(
+        latitude: Double,
+        longitude: Double,
+        completion: @escaping (String?) -> Void
+    ) {
+        let location = CLLocation(latitude: latitude, longitude: longitude)
+        CLGeocoder().reverseGeocodeLocation(location) { placemarks, _ in
+            completion(placemarks?.first?.locality)
+        }
     }
 }

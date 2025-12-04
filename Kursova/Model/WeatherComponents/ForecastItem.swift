@@ -35,4 +35,13 @@ struct ForecastItem: Decodable {
         formatter.locale = Locale(identifier: "uk_UA")
         return formatter.string(from: date)
     }
+    
+    
+    //для часу 18:00
+    var timeString: String {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "HH:mm"
+            formatter.locale = Locale(identifier: "uk_UA")
+            return formatter.string(from: date)
+        }
 }

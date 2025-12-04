@@ -1,12 +1,10 @@
-// ViewModel/WeatherViewModel.swift
-
 import SwiftUI
 import Foundation
-import CoreLocation
+
 
 class WeatherViewModel: NSObject, ObservableObject {
     
-    private let DEFAULT_CITY = "Lviv"
+    private let DEFAULT_CITY = "Львів"
     
     @Published var currentCity: String
     @Published var currentWeather: CurrentWeatherResponse? //Поточна погода
@@ -42,7 +40,7 @@ class WeatherViewModel: NSObject, ObservableObject {
                     let lat = coordinate.latitude
                     let lon = coordinate.longitude
                     
-                    self.resolveCityName(latitude: lat, longitude: lon) { cityName in
+                    self.locationManager.resolveCityName(latitude: lat, longitude: lon) { cityName in
                         DispatchQueue.main.async {
                             self.fetchWeather(city: cityName, lat: lat, lon: lon)
                         }
@@ -78,6 +76,7 @@ class WeatherViewModel: NSObject, ObservableObject {
             self.fetchWeatherAndForecast(city: city, isSystemReserve: isReserve)
         }
     }
+    
     static func getBackground(for mainCondition: String?) -> String {
         guard let condition = mainCondition else {
             return "ErrorBG"
@@ -101,11 +100,10 @@ class WeatherViewModel: NSObject, ObservableObject {
         service.fetchCurrentWeather(lat: lat, lon: lon) { [weak self] currentResult in
             self?.handleFetchResults(
                 currentResult: currentResult,
-                isLocationAttempt: true,
                 isSystemReserve: false,
                 lat: lat,
                 lon: lon,
-                city: explicitCityName   // ← ПЕРЕДАЄМО НАЗВУ
+                city: explicitCityName
             )
         }
     }
@@ -114,13 +112,13 @@ class WeatherViewModel: NSObject, ObservableObject {
     //викликається коли  відоме місто
     private func fetchWeatherAndForecast(city: String, isSystemReserve: Bool) {
         service.fetchCurrentWeather(city: city) { [weak self] currentResult in
-            self?.handleFetchResults(currentResult: currentResult, isLocationAttempt: false, isSystemReserve: isSystemReserve, lat: nil, lon: nil, city: city)
+            self?.handleFetchResults(currentResult: currentResult, isSystemReserve: isSystemReserve, lat: nil, lon: nil, city: city)
         }
     }
     
     
     //обробка даних отриманих від API для поточної погоди
-    private func handleFetchResults(currentResult: Result<CurrentWeatherResponse, APIError>, isLocationAttempt: Bool, isSystemReserve: Bool, lat: Double?, lon: Double?, city: String?) {
+    private func handleFetchResults(currentResult: Result<CurrentWeatherResponse, APIError>, isSystemReserve: Bool, lat: Double?, lon: Double?, city: String?) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             
@@ -231,14 +229,14 @@ class WeatherViewModel: NSObject, ObservableObject {
             let lat = lastLocation.coordinate.latitude
             let lon = lastLocation.coordinate.longitude
             
-            resolveCityName(latitude: lat, longitude: lon) { cityName in
+                locationManager.resolveCityName(latitude: lat, longitude: lon) { cityName in
                 DispatchQueue.main.async {
                     self.fetchWeather(city: cityName, lat: lat, lon: lon)
                 }
             }
             return
         }
-        // Додаємо таймаут на випадок зависання (опціонально, але рекомендовано)
+        // Додаємо таймаут на випадок зависання
         DispatchQueue.main.asyncAfter(deadline: .now() + 10) { [weak self] in
             if self?.isLoading == true {
                 self?.isLoading = false
@@ -257,7 +255,7 @@ class WeatherViewModel: NSObject, ObservableObject {
                     let lat = coordinate.latitude
                     let lon = coordinate.longitude
                     
-                    self.resolveCityName(latitude: lat, longitude: lon) { cityName in
+                    self.locationManager.resolveCityName(latitude: lat, longitude: lon) { cityName in
                         DispatchQueue.main.async {
                             self.fetchWeather(city: cityName, lat: lat, lon: lon)
                         }
@@ -277,20 +275,4 @@ class WeatherViewModel: NSObject, ObservableObject {
         }
     }
     
-    private func resolveCityName(
-        latitude: Double,
-        longitude: Double,
-        completion: @escaping (String?) -> Void
-    ) {
-        let location = CLLocation(latitude: latitude, longitude: longitude)
-        CLGeocoder().reverseGeocodeLocation(location) { placemarks, error in
-            if let placemark = placemarks?.first {
-                // locality – це зазвичай назва міста
-                let city = placemark.locality
-                completion(city)
-            } else {
-                completion(nil)
-            }
-        }
-    }
 }

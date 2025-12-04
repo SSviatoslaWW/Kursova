@@ -3,7 +3,7 @@ import MapKit
 import Combine
 
 
-
+//отримує підказки через MKLocalSearchCompleter і потім уточнює їх через MKLocalSearch.
 class CitySearchManager: NSObject, ObservableObject, MKLocalSearchCompleterDelegate {
     
     @Published var queryFragment: String = ""
@@ -11,9 +11,10 @@ class CitySearchManager: NSObject, ObservableObject, MKLocalSearchCompleterDeleg
     @Published var statusMessage: String? = nil
     
     private let completer = MKLocalSearchCompleter()
+    //Підписка Combine — стежить за введенням тексту
     private var cancellable: AnyCancellable?
     
-    // Зберігаємо активні запити перевірки, щоб скасовувати їх
+    // Зберігаємо активні запити перевірки щоб скасовувати їх
     private var activeValidations: [MKLocalSearch] = []
     
     override init() {
@@ -22,8 +23,8 @@ class CitySearchManager: NSObject, ObservableObject, MKLocalSearchCompleterDeleg
         completer.resultTypes = .address
         
         cancellable = $queryFragment
-            .debounce(for: .milliseconds(500), scheduler: RunLoop.main) // Оптимальна затримка
-            .removeDuplicates()
+            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
+            .removeDuplicates() //якщо текст без змін не перезаписуємо
             .sink { [weak self] fragment in
                 guard let self = self else { return }
                 
@@ -47,6 +48,7 @@ class CitySearchManager: NSObject, ObservableObject, MKLocalSearchCompleterDeleg
         activeValidations.removeAll()
     }
     
+    //Викликається, коли completer повернув нові текстові підказки
     func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
         let rawResults = completer.results
         
@@ -59,6 +61,7 @@ class CitySearchManager: NSObject, ObservableObject, MKLocalSearchCompleterDeleg
         verifyResults(rawResults)
     }
     
+    //Викликається при помилці autocomplete
     func completer(_ completer: MKLocalSearchCompleter, didFailWithError error: Error) {
         // Ігноруємо помилку скасування (вона нормальна при швидкому друці)
         if (error as NSError).code != -10 {
@@ -66,6 +69,7 @@ class CitySearchManager: NSObject, ObservableObject, MKLocalSearchCompleterDeleg
         }
     }
     
+    //Перевіряємо через MKLocalSearch, чи підказка справді є містом
     private func verifyResults(_ completions: [MKLocalSearchCompletion]) {
         // 1. ЛІМІТ: Беремо тільки ТОП-4 найімовірніших результати
         var candidates = Array(completions.prefix(4))
@@ -82,6 +86,7 @@ class CitySearchManager: NSObject, ObservableObject, MKLocalSearchCompleterDeleg
             return
         }
         
+        //використовується щоб дочекатися всіх запитів
         let group = DispatchGroup()
         var verifiedCities: [CitySearchResult] = []
         // Синхронізація доступу до масиву verifiedCities
@@ -111,6 +116,7 @@ class CitySearchManager: NSObject, ObservableObject, MKLocalSearchCompleterDeleg
                         coordinate: item.placemark.coordinate
                     )
                     
+                    //блокуємо потоки
                     lock.lock()
                     verifiedCities.append(city)
                     lock.unlock()
@@ -118,6 +124,7 @@ class CitySearchManager: NSObject, ObservableObject, MKLocalSearchCompleterDeleg
             }
         }
         
+        //Після всіх запитів
         group.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
             
@@ -136,6 +143,8 @@ class CitySearchManager: NSObject, ObservableObject, MKLocalSearchCompleterDeleg
         }
     }
     
+    
+    //Формування підзаголовка
     private func formatSubtitle(placemark: MKPlacemark) -> String {
         var parts: [String] = []
         if let admin = placemark.administrativeArea { parts.append(admin) }

@@ -6,12 +6,13 @@ struct SearchPanel: View {
     @Binding var cityInput: String
     @ObservedObject var searchManager: CitySearchManager
     @FocusState private var isFocused: Bool
+    @StateObject private var searchPanelVM = SearchPanelViewModel()
     
     let barGradientColors: [Color] = AppColors.magentaCyan
     let buttonGradientColors: [Color] = AppColors.magentaPink
     
     var body: some View {
-        VStack(spacing: 0) { // Зовнішній контейнер для вирівнювання
+        VStack(spacing: 0) {
             
             // --- ОСНОВНА ПАНЕЛЬ ПОШУКУ ---
             HStack(spacing: 15) {
@@ -96,7 +97,7 @@ struct SearchPanel: View {
                     }
                     .scrollBounceBehavior(.basedOnSize)
                     .scrollDisabled(CGFloat(searchManager.results.count) * 65 < 190)
-                    .frame(height: calculateHeight())
+                    .frame(height: searchPanelVM.calculateHeight(for: searchManager.results.count))
                     
                 } else if let message = searchManager.statusMessage {
                     // --- ВАРІАНТ 2: ПОВІДОМЛЕННЯ ---
@@ -131,33 +132,25 @@ struct SearchPanel: View {
             )
             .cornerRadius(15)
             .padding(.horizontal, 20)
-            .offset(y: 60) 
+            .offset(y: 60)
             .transition(.opacity)
         }
     }
     
     // Додаємо optional lat і lon
     private func performSearch(for city: String, lat: Double? = nil, lon: Double? = nil) {
-        if !city.isEmpty {
-            cityInput = city
-            // Передаємо координати, якщо вони є (а вони будуть завдяки нашому менеджеру)
-            viewModel.fetchWeather(city: city, lat: lat, lon: lon)
-            
-            isFocused = false
-            UIApplication.shared.endEditing()
-            cityInput = ""
-        }
-    }
-    
-    // Розрахунок висоти
-    private func calculateHeight() -> CGFloat {
-        // Приблизна висота одного рядка (текст + підзаголовок + відступи + розділювач)
-        let rowHeight: CGFloat = 65
+        searchPanelVM.performSearch(
+            city: city,
+            lat: lat,
+            lon: lon,
+            weatherViewModel: viewModel
+        )
         
-        // Рахуємо загальну висоту: к-сть елементів * висоту рядка
-        let contentHeight = CGFloat(searchManager.results.count) * rowHeight
-        
-        // Повертаємо менше з двох: або реальна висота, або ліміт 190
-        return min(contentHeight, 190)
+        // 2. Якщо місто непорожнє — закриваємо клавіатуру, очищаємо поле
+        guard !city.isEmpty else { return }
+        isFocused = false
+        UIApplication.shared.endEditing()
+        cityInput = ""
     }
 }
+

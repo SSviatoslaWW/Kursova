@@ -18,10 +18,6 @@ struct DailyDetailView: View {
         formatter.locale = Locale(identifier: "uk_UA")
         return formatter.string(from: firstItem.date)
     }
-
-    
-    
-    // MARK: - Body View
     
     var body: some View {
         GeometryReader {_ in 
@@ -38,9 +34,6 @@ struct DailyDetailView: View {
                             .opacity(0.3)
                             .ignoresSafeArea() // Переконайтеся, що накладення теж ігнорує безпечні зони
                     )
-                
-                
-                
             }
     
             VStack(spacing: 0) {
@@ -63,11 +56,6 @@ struct DailyDetailView: View {
             .shadow(color: .black.opacity(0.4), radius: 3, x: 0, y: 1)
         }
     }
-    
-    // =============================================================
-    // MARK: - ВНУТРІШНЯ СТРУКТУРА UI (HeaderView)
-    // =============================================================
-
     /// Структура для заголовка та кнопки закриття
     private struct CustomHeaderView: View {
         let dayName: String
@@ -81,7 +69,7 @@ struct DailyDetailView: View {
                 HStack {
                     Spacer()
                     Button("Закрити") {
-                        dismiss() //Викликаємо дію закриття
+                        dismiss()
                     }
                     .foregroundColor(.white)
                     .padding(.trailing, 16)

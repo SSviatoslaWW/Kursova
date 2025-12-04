@@ -1,5 +1,3 @@
-// Networking/WeatherService.swift
-
 import Foundation
 
 class WeatherService {
@@ -9,9 +7,9 @@ class WeatherService {
         var components = URLComponents(string: Constants.baseURL + endpoint)
         
         var baseQueryItems = [
-            URLQueryItem(name: "appid", value: Constants.apiKey),     //  API ключ
-            URLQueryItem(name: "units", value: Constants.units),      //  Метричні одиниці (°C)
-            URLQueryItem(name: "lang", value: "ua")                   //  Мова відповіді (Українська)
+            URLQueryItem(name: "appid", value: Constants.apiKey),
+            URLQueryItem(name: "units", value: Constants.units),
+            URLQueryItem(name: "lang", value: "ua")
         ]
         
         baseQueryItems.append(contentsOf: queryItems)

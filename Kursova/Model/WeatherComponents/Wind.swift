@@ -9,7 +9,7 @@ struct Wind: Decodable {
         guard let deg = deg else { return "—" }
         
         let directions = ["Пн", "ПнСх", "Сх", "ПдСх", "Пд", "ПдЗх", "Зх", "ПнЗх"]
-        // Використання бітового AND (& 7) для безпечного взяття індексу по модулю 8
+        // Використання бітового AND для безпечного взяття індексу по модулю 8
         let index = Int((Double(deg) + 22.5) / 45.0) & 7
         return directions[index]
     }

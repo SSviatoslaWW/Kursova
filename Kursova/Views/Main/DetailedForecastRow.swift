@@ -1,8 +1,5 @@
-// один рядок у модалці
-
 import SwiftUI
 
-// MARK: - Основний Рядок Прогнозу
 struct DetailedForecastRow: View {
     
     let item: ForecastItem
@@ -23,7 +20,7 @@ struct DetailedForecastRow: View {
                     .foregroundColor(.white.opacity(0.8))
                 
                 Text(item.main.temperatureString)
-                    .font(.system(size: 28, weight: .bold)) // Збільшений шрифт як на макеті
+                    .font(.system(size: 28, weight: .bold))
                     .foregroundColor(.white)
             }
             .frame(width: 80, alignment: .leading)
@@ -33,6 +30,7 @@ struct DetailedForecastRow: View {
             // ПРАВА ЧАСТИНА: Іконка та Опис
             HStack(spacing: 12) {
                 SmartWeatherIcon(iconCode: item.weather.first?.icon, size: 60)
+                    .id(item.weather.first?.icon)
                 Text(item.weather.first?.description.capitalized ?? "---")
                     .font(.body)
                     .foregroundColor(.white)

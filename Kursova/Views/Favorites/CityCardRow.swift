@@ -36,7 +36,6 @@ struct CityCardRow: View {
                     }
                 }
             }
-            // 🔑 тут ми керуємо ефектом зміщення картки
             .frame(width: isEditing ? 50 : 0, height: 50, alignment: .leading)
             .opacity(isEditing ? 1 : 0)
             

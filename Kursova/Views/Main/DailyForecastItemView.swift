@@ -9,8 +9,6 @@ struct DailyForecastItemView: View {
     
     @State private var showingDetail = false
     
-    // --- ОСНОВНА VIEW ---
-    
     var body: some View {
         // Кнопка, що відкриває модальне вікно
         Button(action: {
@@ -28,18 +26,16 @@ struct DailyForecastItemView: View {
                 // 2. ГОЛОВНИЙ HSTACK: (Іконка 1 | Велика Temp | Деталі)
                 HStack(spacing: 12) {
                     // --- КОЛОНКА 1: "іконка" ---
-                    // Використовуємо нову в'юху. Передаємо код іконки (String), а не URL.
                     SmartWeatherIcon(iconCode: item.weather.first?.icon, size: 70)
-                        // Ті самі модифікатори фону та форми, що були у тебе раніше,
-                        // застосовуємо зовні до нашої нової в'юхи.
+                        .id(item.weather.first?.icon)
                         .background(.white.opacity(0.5))
                         .clipShape(Circle())
                         .frame(width: 70) // Фіксуємо ширину колонки
                     
                     // --- КОЛОНКА 2: "велика температура" ---
                     Text(item.main.temperatureString)
-                        .font(.system(size: 45, weight: .bold))
-                        .shadow(color: .white.opacity(0.5), radius: 5) // Неоновий ефект
+                        .font(.system(size: 40, weight: .bold))
+                        .shadow(color: .white.opacity(0.5), radius: 5)
                         .frame(width: 110, alignment: .center)
                     Spacer()
                     
@@ -103,17 +99,17 @@ struct DailyForecastItemView: View {
                                 .foregroundColor(.white.opacity(0.9))
                             }
                             
-                        } // Кінець ViewThatFits
+                        }
                         
-                        // 2. "СМУГА З ВОЛОГІСТЮ" (завжди внизу)
+                        // 2. "СМУГА З ВОЛОГІСТЮ"
                         HumidityProgressBar(humidity: item.main.humidity, fillColor: AppColors.indicatorCyan)
                             .padding(.top, 4)
                         
-                    } // Кінець головного VStack// Кінець VStack (Колонка 3)
+                    }
                     
-                } // Кінець Hstack (Головний вміст)
+                }
                 
-            } // Кінець VStack (Головна картка)
+            } 
             .foregroundColor(.white)
             .padding(.vertical, 12)
             .padding(.horizontal, 16)

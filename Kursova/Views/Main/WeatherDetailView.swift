@@ -1,17 +1,12 @@
 import SwiftUI
 
-// MARK: - Головна View
 struct WeatherDetailView: View {
-    
-    // MARK: - Властивості
     
     @ObservedObject var viewModel: WeatherViewModel
     @ObservedObject var favoritesVM: FavoritesViewModel
     @State private var cityInput: String = ""
     
     @StateObject private var searchManager = CitySearchManager()
-    
-    // MARK: - Body
     
     var body: some View {
         GeometryReader { geometry in
@@ -39,10 +34,9 @@ struct WeatherDetailView: View {
                     
                     // ВАРІАНТ А: Йде завантаження або помилка
                     StatusAndErrorView(viewModel: viewModel)
-                        .transition(.opacity) // Плавна поява
+                        .transition(.opacity)
                     
                     // Важливо: Додаємо Spacer, щоб заповнити порожнє місце знизу,
-                    // інакше SearchPanel може "з'їхати" вниз по центру екрану.
                     Spacer()
                     
                 } else {
