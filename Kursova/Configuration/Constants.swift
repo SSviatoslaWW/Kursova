@@ -4,7 +4,6 @@ import Foundation
 
 struct Constants {
     
-    // MARK: - API Connection Details
     static let baseURL = "https://api.openweathermap.org/data/2.5/"
     //спосіб отримати ключ через посилання у Info.plist
     static var apiKey: String {
