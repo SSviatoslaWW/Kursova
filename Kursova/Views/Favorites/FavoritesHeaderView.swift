@@ -55,7 +55,7 @@ struct FavoritesHeaderView: View {
                 Spacer()
             }
         }
-        .padding(.top, 50)
+        .padding(.top, 20)
         .padding(.horizontal, 16)
         .padding(.bottom, 20)
         .animation(.spring(), value: showEditButton)

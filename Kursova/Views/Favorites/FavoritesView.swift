@@ -76,6 +76,6 @@ struct FavoritesView: View {
                 }
             }
         }
-        .ignoresSafeArea()
+        //.ignoresSafeArea()
     }
 }

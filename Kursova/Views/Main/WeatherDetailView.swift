@@ -70,7 +70,7 @@ struct WeatherDetailView: View {
             }
             
         }
-        .ignoresSafeArea()
+        
         .onAppear {
             if viewModel.currentWeather == nil {
                 viewModel.requestUserLocation()
@@ -81,5 +81,7 @@ struct WeatherDetailView: View {
             // Закриваємо клавіатуру при тапі на фон
             UIApplication.shared.endEditing()
         }
+        
+        
     }
 }
