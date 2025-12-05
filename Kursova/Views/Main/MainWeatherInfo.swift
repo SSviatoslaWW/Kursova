@@ -8,7 +8,16 @@ struct MainWeatherInfo: View {
     let favoriteColor = AppColors.favoriteYellow
     
     var body: some View {
-        let isFavorite = favoritesVM.favoriteLocations.contains(where: { $0.id == weather.id })
+        let isFavorite = favoritesVM.favoriteLocations.contains(where: { savedLocation in
+            let idMatch = savedLocation.id == weather.id
+            
+            // Перевіряємо, чи це фізично те саме місце (похибка ~5км)
+            let latDiff = abs(savedLocation.lat - weather.coord.lat)
+            let lonDiff = abs(savedLocation.lon - weather.coord.lon)
+            let isNearby = latDiff < 0.05 && lonDiff < 0.05
+            
+            return idMatch && isNearby
+        })
         
         HStack(alignment: .center) {
             // Ліва частина (Інформація про погоду)

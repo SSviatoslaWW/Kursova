@@ -23,16 +23,14 @@ class FavoritesViewModel: ObservableObject {
     
     //Додавання нового міста
     func addLocation(_ location: FavoriteLocation) {
-        
-        if let index = favoriteLocations.firstIndex(where: {
-            // Місто вважається однаковим, якщо збігається назва і країна
-            $0.name.caseInsensitiveCompare(location.name) == .orderedSame &&
-            $0.country.caseInsensitiveCompare(location.country) == .orderedSame
-        }) {
-            // Місто вже є у списку → видаляємо
+        print("All the location favorites \(favoriteLocations)")
+        print("-----------------------------------------------")
+        if let index = favoriteLocations.firstIndex(of: location) {
+            print("Remove Item at index \(index)")
+            print(favoriteLocations[index])
             favoriteLocations.remove(at: index)
         } else {
-            // Додаємо нове місто
+            print("Add location \(location)")
             favoriteLocations.append(location)
         }
     }

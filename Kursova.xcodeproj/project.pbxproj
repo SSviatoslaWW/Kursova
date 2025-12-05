@@ -34,7 +34,6 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
-				Keys.xcconfig,
 			);
 			target = 4C9DABF92E9FBAC800CDC0B9 /* Kursova */;
 		};
