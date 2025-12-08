@@ -2,7 +2,7 @@ import SwiftUI
 
 final class SearchPanelViewModel: ObservableObject {
     
-    /// Виконує пошук погоди для міста (з optional координатами)
+    /// Виконує пошук погоди для міста 
     func performSearch(
         city: String,
         lat: Double? = nil,

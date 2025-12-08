@@ -18,7 +18,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     override init() {
         super.init()
         manager.delegate = self
-        // kCLLocationAccuracyThreeKilometers зазвичай найшвидший варіант, достатній для погоди.
+
         manager.desiredAccuracy = kCLLocationAccuracyThreeKilometers
     }
     
@@ -34,7 +34,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         // Перевіряємо статус авторизації
         switch manager.authorizationStatus {
         case .authorizedWhenInUse, .authorizedAlways:
-            // Все ок, запускаємо запит
+            //запускаємо запит
             manager.requestLocation()
             
         case .denied, .restricted:
@@ -43,7 +43,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
             self.locationCompletion = nil
             
         case .notDetermined:
-            // Чекаємо на рішення користувача (спрацює метод делегата didChangeAuthorization)
+            // Чекаємо на рішення користувача
             break
             
         @unknown default:
@@ -89,7 +89,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print("Location Manager Error: \(error.localizedDescription)")
         
-        // Ігноруємо помилку, якщо це kCLErrorLocationUnknown (система ще шукає)
+        // Ігноруємо помилку, якщо це kCLErrorLocationUnknown
         if (error as NSError).code == CLError.locationUnknown.rawValue {
             return
         }

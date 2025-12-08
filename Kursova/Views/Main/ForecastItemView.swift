@@ -9,23 +9,23 @@ struct ForecastItemView: View {
     var body: some View {
         VStack(spacing: 12) {
             
-            // 1. Час
+            //Час
             Text(item.timeString)
                 .font(.headline.bold())
                 .foregroundColor(.white.opacity(0.8))
                 .shadow(color: .white.opacity(0.5), radius: 5)
             
-            // 2. Іконка Погоди
+            //Іконка Погоди
             SmartWeatherIcon(iconCode: item.weather.first?.icon, size: 70)
-                .background(.white.opacity(0.3)) // Твій стиль фону
-                .clipShape(Circle())             // Твоя форма
+                .background(.white.opacity(0.3))
+                .clipShape(Circle())             
             
-            // 3. Температура
+            //Температура
             Text(item.main.temperatureString)
                 .font(.system(size: 38, weight: .bold))
                 .shadow(color: .white.opacity(0.5), radius: 5)
             
-            // 4. Вітер і Тиск
+            //Вітер і Тиск
             VStack {
                 // Вітер
                 if let windData = item.wind {
@@ -50,13 +50,13 @@ struct ForecastItemView: View {
             }
             .foregroundColor(.white.opacity(0.8))
             
-            // 5. Смуга Вологості
+            //Смуга Вологості
             HumidityProgressBar(humidity: item.main.humidity, fillColor: AppColors.indicatorCyan)
             
         }
         .padding(.vertical, 16)
         .padding(.horizontal, 40)
-        .clipShape(RoundedRectangle(cornerRadius: 24)) // Округлені кути
+        .clipShape(RoundedRectangle(cornerRadius: 24))
         .overlay( // Неонова рамка
             NeonBorder(
                 shape: RoundedRectangle(cornerRadius: 24),

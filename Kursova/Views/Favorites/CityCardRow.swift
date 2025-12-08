@@ -12,7 +12,7 @@ struct CityCardRow: View {
     
     var body: some View {
         HStack(spacing: 15) {
-            // Кнопка видалення зліва (режим редагування)
+            // Кнопка видалення зліва
             ZStack {
                 Button(action: {
                     guard isEditing else { return }

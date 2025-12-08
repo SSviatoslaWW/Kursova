@@ -8,7 +8,6 @@ struct NeonBorder<S: Shape>: View {
     
     var body: some View {
         
-        // 2. Створюємо градієнт
         let gradient = AngularGradient(
             gradient: Gradient(colors: colors),
             center: .center,
@@ -18,12 +17,10 @@ struct NeonBorder<S: Shape>: View {
         )
         
         ZStack {
-            // Шар 1: Широке "сяйво" (haze)
             shape
                 .stroke(gradient, lineWidth: lineWidth) //обведення
                 .blur(radius: blurRadius)
             
-            // Шар 2: Яскрава "серцевина" (hot core)
             shape
                 .stroke(gradient, lineWidth: lineWidth / 2)
                 .blur(radius: blurRadius / 3)

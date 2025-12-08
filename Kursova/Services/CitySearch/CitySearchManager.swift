@@ -63,7 +63,7 @@ class CitySearchManager: NSObject, ObservableObject, MKLocalSearchCompleterDeleg
     
     //Викликається при помилці autocomplete
     func completer(_ completer: MKLocalSearchCompleter, didFailWithError error: Error) {
-        // Ігноруємо помилку скасування (вона нормальна при швидкому друці)
+        // Ігноруємо помилку скасування при швидкому друці
         if (error as NSError).code != -10 {
             self.statusMessage = "Помилка з'єднання"
         }
@@ -71,10 +71,10 @@ class CitySearchManager: NSObject, ObservableObject, MKLocalSearchCompleterDeleg
     
     //Перевіряємо через MKLocalSearch, чи підказка справді є містом
     private func verifyResults(_ completions: [MKLocalSearchCompletion]) {
-        // 1. ЛІМІТ: Беремо тільки ТОП-4 найімовірніших результати
+        //тільки 4 найімовірніших результати
         var candidates = Array(completions.prefix(4))
         
-        // Якщо починається з цифри - це не місто
+        // відкидання назв з цифрами 
         candidates = candidates.filter {
             let firstChar = $0.title.first
             return firstChar != nil && !firstChar!.isNumber

@@ -1,6 +1,5 @@
 import SwiftUI
 
-/// Панель пошуку з неоновим стилем та автозаповненням (Overlay версія)
 struct SearchPanel: View {
     @ObservedObject var viewModel: WeatherViewModel
     @Binding var cityInput: String
@@ -59,10 +58,9 @@ struct SearchPanel: View {
         }
         .overlay(alignment: .top) {
             
-            // Група об'єднує логіку, щоб ми могли застосувати стиль до результату вибору
             Group {
                 if !searchManager.results.isEmpty {
-                    // --- ВАРІАНТ 1: СПИСОК ---
+                    // --- СПИСОК ---
                     ScrollView {
                         VStack(alignment: .leading, spacing: 0) {
                             ForEach(searchManager.results) { result in
@@ -100,7 +98,7 @@ struct SearchPanel: View {
                     .frame(height: searchPanelVM.calculateHeight(for: searchManager.results.count))
                     
                 } else if let message = searchManager.statusMessage {
-                    // --- ВАРІАНТ 2: ПОВІДОМЛЕННЯ ---
+                    // --- ПОВІДОМЛЕННЯ ---
                     VStack(spacing: 10) {
                         Image(systemName: "magnifyingglass.circle")
                             .font(.largeTitle)
@@ -110,7 +108,6 @@ struct SearchPanel: View {
                             .foregroundColor(.white)
                             .font(.subheadline)
                     }
-                    // Висота для повідомлення фіксована
                     .frame(height: 100)
                     .frame(maxWidth: .infinity)
                 }
@@ -137,7 +134,6 @@ struct SearchPanel: View {
         }
     }
     
-    // Додаємо optional lat і lon
     private func performSearch(for city: String, lat: Double? = nil, lon: Double? = nil) {
         searchPanelVM.performSearch(
             city: city,
@@ -146,7 +142,6 @@ struct SearchPanel: View {
             weatherViewModel: viewModel
         )
         
-        // 2. Якщо місто непорожнє — закриваємо клавіатуру, очищаємо поле
         guard !city.isEmpty else { return }
         isFocused = false
         UIApplication.shared.endEditing()

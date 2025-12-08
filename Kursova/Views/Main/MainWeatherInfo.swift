@@ -20,7 +20,7 @@ struct MainWeatherInfo: View {
         })
         
         HStack(alignment: .center) {
-            // Ліва частина (Інформація про погоду)
+            //Інформація про погоду
             VStack(alignment: .leading, spacing: 8) {
                 Text(cityName)
                     .font(.system(size: 30, weight: .bold))
@@ -38,7 +38,7 @@ struct MainWeatherInfo: View {
             
             Spacer() 
             
-            // Права частина (Кнопка "Улюблене")
+            //Кнопка "Улюблене"
             Button {
                 let countryCode = weather.sys.country
                 let countryName = Locale.current.localizedString(forRegionCode: countryCode) ?? countryCode

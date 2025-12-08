@@ -10,31 +10,29 @@ struct SmartWeatherIcon: View {
         self.size = size
         self.placeholderColor = placeholderColor
         
-        // Формуємо URL
         var url: URL? = nil
         if let iconCode = iconCode {
             url = Constants.iconURL(iconCode: iconCode)
         }
         
-        // Ініціалізуємо StateObject з цим URL
+        // Ініціалізація StateObject з цим URL
         _loader = StateObject(wrappedValue: ImageLoader(url: url))
     }
     
     var body: some View {
         Group {
             if let image = loader.image {
-                // ВАРІАНТ 1: Картинка успішно завантажена (з кешу або мережі)
+                //Картинка успішно завантажена
                 Image(uiImage: image)
                     .resizable()
                     .scaledToFit()
             } else if loader.isLoading {
-                // ВАРІАНТ 2: Процес завантаження
+                //Процес завантаження
                 ProgressView()
                     .tint(placeholderColor)
-                    // Робимо лоадер трохи меншим, якщо сама іконка мала
                     .scaleEffect(size > 50 ? 1.0 : 0.7)
             } else {
-                // ВАРІАНТ 3: Помилка або відсутність URL (Плейсхолдер)
+                //Помилка або відсутність URL
                 Image(systemName: "cloud.sun.fill")
                     .resizable()
                     .scaledToFit()
@@ -43,9 +41,7 @@ struct SmartWeatherIcon: View {
             }
         }
         .frame(width: size, height: size)
-        // Запускаємо завантаження при появі на екрані
         .onAppear { loader.load() }
-        // Скасовуємо завантаження, якщо в'юха зникає
         .onDisappear { loader.cancel() }
     }
 }

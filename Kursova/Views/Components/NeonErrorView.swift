@@ -12,7 +12,7 @@ struct NeonErrorView: View {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 40))
                 .foregroundColor(.yellow)
-                .shadow(color: .orange, radius: 10) // Неонове світіння іконки
+                .shadow(color: .orange, radius: 10) 
             
             
             Text(errorMessage)
@@ -25,7 +25,6 @@ struct NeonErrorView: View {
         .padding(.horizontal, 30)
         .background(Color.black.opacity(0.6))
         .cornerRadius(20)
-        // Неонова рамка
         .overlay(
             NeonBorder(
                 shape: RoundedRectangle(cornerRadius: 20),
@@ -34,7 +33,6 @@ struct NeonErrorView: View {
                 blurRadius: 6
             )
         )
-        // Центрування на екрані
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         .padding(.horizontal, 40) 
     }

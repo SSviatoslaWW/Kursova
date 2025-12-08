@@ -23,14 +23,9 @@ class FavoritesViewModel: ObservableObject {
     
     //Додавання нового міста
     func addLocation(_ location: FavoriteLocation) {
-        print("All the location favorites \(favoriteLocations)")
-        print("-----------------------------------------------")
         if let index = favoriteLocations.firstIndex(of: location) {
-            print("Remove Item at index \(index)")
-            print(favoriteLocations[index])
             favoriteLocations.remove(at: index)
         } else {
-            print("Add location \(location)")
             favoriteLocations.append(location)
         }
     }

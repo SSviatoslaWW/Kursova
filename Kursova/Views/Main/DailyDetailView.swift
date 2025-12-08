@@ -8,9 +8,6 @@ struct DailyDetailView: View {
     let dayForecast: [ForecastItem]
     let dayName: String
     
-    // MARK: - Обчислювані Властивості та Логіка
-    
-    /// Форматує дату елемента прогнозу (наприклад, "17 жовтня 2025").
     private var fullDateString: String {
         guard let firstItem = dayForecast.first else { return "" }
         let formatter = DateFormatter()
@@ -23,16 +20,14 @@ struct DailyDetailView: View {
         GeometryReader {_ in 
             ZStack {
                 
-                // Фон, що заповнює весь екран
                 Image(WeatherViewModel.getBackground(for: dayForecast.first?.weather.first?.main))
                     .resizable()
                     .scaledToFill()
                     .ignoresSafeArea()
                     .overlay(
-                        // Додаємо накладення чорного кольору
                         Color.black
                             .opacity(0.3)
-                            .ignoresSafeArea() // Переконайтеся, що накладення теж ігнорує безпечні зони
+                            .ignoresSafeArea()
                     )
             }
     
@@ -50,7 +45,7 @@ struct DailyDetailView: View {
                     }
                     .padding()
                 }
-                .scrollBounceBehavior(.basedOnSize) // Контроль відскоку
+                .scrollBounceBehavior(.basedOnSize)
             }
             .foregroundColor(.white)
             .shadow(color: .black.opacity(0.4), radius: 3, x: 0, y: 1)

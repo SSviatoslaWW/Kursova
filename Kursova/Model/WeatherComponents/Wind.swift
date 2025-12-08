@@ -1,10 +1,10 @@
 import Foundation
 
 struct Wind: Decodable {
-    let speed: Double? // Швидкість вітру
-    let deg: Int?      // Напрямок вітру (градуси)
+    let speed: Double?
+    let deg: Int?      // Напрямок вітру
     
-    // Перетворює градуси (0-360) на напрямок (Пн, Сх, Пд, Зх)
+    // Перетворює градуси на напрямок
     var directionShort: String {
         guard let deg = deg else { return "—" }
         

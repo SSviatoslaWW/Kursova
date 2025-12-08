@@ -15,59 +15,57 @@ struct WeatherDetailView: View {
                 Image(WeatherViewModel.getBackground(for: viewModel.currentWeather?.weather.first?.main))
                     .resizable()
                     .scaledToFill()
-                    .frame(width: geometry.size.width, height: geometry.size.height)
-                    .ignoresSafeArea()
+                    //.frame(width: geometry.size.width, height: geometry.size.height)
+                    .ignoresSafeArea(edges: [.top, .bottom, .trailing])
                     .overlay(
                         Color.black
                             .opacity(0.5)
                             .ignoresSafeArea()
                     )
-                // Основний контент
-                VStack(spacing: 20) {
+            }
+            // Основний контент
+            VStack(spacing: 20) {
+                
+                // Панель пошуку
+                SearchPanel(viewModel: viewModel, cityInput: $cityInput, searchManager: searchManager)
+                    .zIndex(2)
+                
+                if viewModel.isLoading || viewModel.errorMessage != nil {
                     
-                    // Панель пошуку
-                    SearchPanel(viewModel: viewModel, cityInput: $cityInput, searchManager: searchManager)
-                        .zIndex(2)
+                    // завантаження або помилка
+                    StatusAndErrorView(viewModel: viewModel)
+                        .transition(.opacity)
                     
-                    // Умова: АБО статус, АБО погода
-                    if viewModel.isLoading || viewModel.errorMessage != nil {
-                        
-                        // ВАРІАНТ А: Йде завантаження або помилка
-                        StatusAndErrorView(viewModel: viewModel)
-                            .transition(.opacity)
-                        
-                        // Важливо: Додаємо Spacer, щоб заповнити порожнє місце знизу,
-                        Spacer()
-                        
-                    } else {
-                        
-                        // ВАРІАНТ Б: Показуємо погоду (тільки коли немає завантаження і помилок)
-                        WeatherScrollView(viewModel: viewModel, favoritesVM: favoritesVM, geometry: geometry)
-                            .transition(.opacity) // Плавна поява
-                    }
+                    Spacer()
+                    
+                } else {
+                    
+                    //Показуємо погоду
+                    WeatherScrollView(viewModel: viewModel, favoritesVM: favoritesVM, geometry: geometry)
+                        .transition(.opacity)
                 }
-                .foregroundColor(.white)
-                // Анімація перемикання між станами (щоб не було різкого блимання)
-                .animation(.easeInOut, value: viewModel.isLoading)
-                .animation(.easeInOut, value: viewModel.errorMessage)
-                .frame(height: geometry.size.height)
-                .alert("Геолокація недоступна", isPresented: $viewModel.showSettingsAlert) {
-                    
-                    // Кнопка 1: Відкрити налаштування
-                    Button("Налаштування") {
-                        if let url = URL(string: UIApplication.openSettingsURLString) {
-                            UIApplication.shared.open(url)
-                        }
+            }
+            .foregroundColor(.white)
+            // Анімація перемикання між станами
+            .animation(.easeInOut, value: viewModel.isLoading)
+            .animation(.easeInOut, value: viewModel.errorMessage)
+            .frame(height: geometry.size.height)
+            .alert("Геолокація недоступна", isPresented: $viewModel.showSettingsAlert) {
+                
+                // Відкрити налаштування
+                Button("Налаштування") {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
                     }
-                    
-                    // Кнопка 2: Скасувати
-                    Button("Скасувати", role: .cancel) { }
-                    
-                } message: {
-                    Text("Щоб бачити погоду у вашому регіоні, будь ласка, надайте дозвіл на використання геолокації в налаштуваннях пристрою.")
                 }
                 
+                // Скасувати
+                Button("Скасувати", role: .cancel) { }
+                
+            } message: {
+                Text("Щоб бачити погоду у вашому регіоні, будь ласка, надайте дозвіл на використання геолокації в налаштуваннях пристрою.")
             }
+            
             
         }
         
@@ -78,7 +76,6 @@ struct WeatherDetailView: View {
         }
         .contentShape(Rectangle()) // Робить всю вільну область клікабельною
         .onTapGesture {
-            // Закриваємо клавіатуру при тапі на фон
             UIApplication.shared.endEditing()
         }
         

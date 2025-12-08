@@ -27,25 +27,24 @@ class ImageLoader: ObservableObject {
         
         isLoading = true
         
-        // 1. ПЕРЕВІРКА КЕШУ: Чи є картинка вже в пам'яті?
+        //Чи є картинка вже в пам'яті?
         if let cachedImage = ImageCache.shared.object(forKey: url.absoluteString as NSString) {
-            // Так, є. Використовуємо її і завершуємо.
             self.image = cachedImage
             self.isLoading = false
             return
         }
 
-        // 2. ЗАВАНТАЖЕННЯ З МЕРЕЖІ: В кеші немає, качаємо.
+        //беремо з інтернету картинку
         cancellable = URLSession.shared.dataTaskPublisher(for: url)
-            .map { UIImage(data: $0.data) } // Пробуємо створити картинку з даних
-            .replaceError(with: nil)        // Ігноруємо помилки
-            .receive(on: DispatchQueue.main)// Переходимо на головний потік для оновлення UI
+            .map { UIImage(data: $0.data) }
+            .replaceError(with: nil)
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] loadedImage in
                 guard let self = self else { return }
                 self.isLoading = false
                 
                 if let loadedImage = loadedImage {
-                    // 3. ЗБЕРЕЖЕННЯ В КЕШ: Успішно скачали, зберігаємо на майбутнє.
+                    //ЗБЕРЕЖЕННЯ В КЕШ
                     ImageCache.shared.setObject(loadedImage, forKey: url.absoluteString as NSString)
                     self.image = loadedImage
                 }

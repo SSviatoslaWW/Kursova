@@ -13,7 +13,7 @@ struct DetailedForecastRow: View {
 
     var body: some View {
         HStack (spacing: 0) {
-            // ЛІВА ЧАСТИНА: Час та Температура
+            //Час та Температура
             VStack(alignment: .leading, spacing: 4) {
                 Text(timeString)
                     .font(.subheadline)
@@ -27,7 +27,7 @@ struct DetailedForecastRow: View {
             
             Spacer()
             
-            // ПРАВА ЧАСТИНА: Іконка та Опис
+            //Іконка та Опис
             HStack(spacing: 12) {
                 SmartWeatherIcon(iconCode: item.weather.first?.icon, size: 60)
                     .id(item.weather.first?.icon)
@@ -42,11 +42,9 @@ struct DetailedForecastRow: View {
         .padding(.vertical, 12)
         .background(
             ZStack {
-                // Напівпрозорий чорний фон плашки
                 RoundedRectangle(cornerRadius: 20)
                     .fill(Color.black.opacity(0.4))
                 
-                // Неонова рамка поверх фону
                 NeonBorder(
                     shape: RoundedRectangle(cornerRadius: 20),
                     colors: AppColors.oceanCool,
@@ -55,7 +53,6 @@ struct DetailedForecastRow: View {
                 )
             }
         )
-        // Додатковий відступ зовні, щоб рамку не обрізало
         .padding(2)
     }
 }

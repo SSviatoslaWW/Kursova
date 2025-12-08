@@ -1,8 +1,8 @@
 import Foundation
 
-// Структура для одного запису прогнозу (один 3-годинний інтервал)
+// Структура для одного запису прогнозу 
 struct ForecastItem: Decodable {
-    let dt: Int             // Час прогнозу (Unix timestamp)
+    let dt: Int             // Час прогнозу
     let main: MainWeather   // Температурні дані для цього інтервалу
     let weather: [WeatherCondition] // Погодні умови для цього інтервалу
     let wind: Wind?
@@ -12,7 +12,7 @@ struct ForecastItem: Decodable {
         Date(timeIntervalSince1970: TimeInterval(dt))
     }
     
-    //Повна назва дня (використовується у модальному вікні)
+    //Повна назва дня
     var fullDayName: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "EEEE" // Формат: Понеділок
@@ -20,7 +20,7 @@ struct ForecastItem: Decodable {
         return formatter.string(from: date).capitalized
     }
     
-    //Скорочена назва дня (використовується для карток 5-денного прогнозу)
+    //Скорочена назва дня
     var dayOfWeekShort: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "EEE" // Формат: Пн, Вт

@@ -56,10 +56,6 @@ class WeatherService {
         }.resume() // Запускає мережевий запит.
     }
     
-    // =============================================================
-    // MARK: - Public API Endpoints (Запит за Назвою Міста)
-    // =============================================================
-    
     /// Запитує поточну погоду за назвою міста.
     func fetchCurrentWeather(city: String, completion: @escaping (Result<CurrentWeatherResponse, APIError>) -> Void) {
         let cityNameQuery = [URLQueryItem(name: "q", value: city)] // Параметр: ?q=city
@@ -68,19 +64,15 @@ class WeatherService {
     
     /// Запитує прогноз на 5 днів за назвою міста.
     func fetchForecast(city: String, completion: @escaping (Result<ForecastResponse, APIError>) -> Void) {
-        let cityNameQuery = [URLQueryItem(name: "q", value: city)] // Параметр: ?q=city
+        let cityNameQuery = [URLQueryItem(name: "q", value: city)]
         fetchData(endpoint: "forecast", queryItems: cityNameQuery, completion: completion)
     }
-    
-    // =============================================================
-    // MARK: - Public API Endpoints (Запит за Координатами)
-    // =============================================================
     
     //функція для формування запиту координат
     private func createCoordinateQuery(lat: Double, lon: Double) -> [URLQueryItem] {
         return [
-            URLQueryItem(name: "lat", value: "\(lat)"), // Параметр широти
-            URLQueryItem(name: "lon", value: "\(lon)")  // Параметр довготи
+            URLQueryItem(name: "lat", value: "\(lat)"),
+            URLQueryItem(name: "lon", value: "\(lon)") 
         ]
     }
     

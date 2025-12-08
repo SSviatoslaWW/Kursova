@@ -20,13 +20,11 @@ struct HumidityProgressBar: View {
                     Capsule()
                         .fill(fillColor)
                         .shadow(color: fillColor.opacity(0.7), radius: 3, x: 0, y: 0)
-                        // Обрізаємо заповнення по ширині
                         .frame(width: geometry.size.width * humidityFraction)
                 }
             }
-            .frame(height: 8) // Встановлюємо висоту для GeometryReader
+            .frame(height: 8)
             
-            // 3. Текстова мітка під смугою
             Text("\(humidity)%")
                 .font(.system(size: 10, weight: .bold))
                 .foregroundColor(.white)
