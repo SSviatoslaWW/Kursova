@@ -11,17 +11,17 @@ struct FavoritesView: View {
     
     var body: some View {
         GeometryReader {geo in
-            ZStack {
-                Image(WeatherViewModel.getBackground(for: weatherVM.currentWeather?.weather.first?.main))
-                    .resizable()
-                    .scaledToFill()
-                    .ignoresSafeArea()
-                    .overlay(
-                        Color.black
-                            .opacity(0.5)
-                            .ignoresSafeArea()
-                    )
-            }
+            
+            Image(WeatherViewModel.getBackground(for: weatherVM.currentWeather?.weather.first?.main))
+                .resizable()
+                .scaledToFill()
+                .ignoresSafeArea()
+                .overlay(
+                    Color.black
+                        .opacity(0.5)
+                        .ignoresSafeArea()
+                )
+            
             VStack(spacing: 0) {
                 FavoritesHeaderView(
                     isEditing: $isEditing,

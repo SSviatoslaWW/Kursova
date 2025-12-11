@@ -10,19 +10,19 @@ struct WeatherDetailView: View {
     
     var body: some View {
         GeometryReader { geometry in
-            ZStack(alignment: .top) {
-                // Фон, що заповнює весь екран
-                Image(WeatherViewModel.getBackground(for: viewModel.currentWeather?.weather.first?.main))
-                    .resizable()
-                    .scaledToFill()
-                    //.frame(width: geometry.size.width, height: geometry.size.height)
-                    .ignoresSafeArea(edges: [.top, .bottom, .trailing])
-                    .overlay(
-                        Color.black
-                            .opacity(0.5)
-                            .ignoresSafeArea()
-                    )
-            }
+            
+            // Фон, що заповнює весь екран
+            Image(WeatherViewModel.getBackground(for: viewModel.currentWeather?.weather.first?.main))
+                .resizable()
+                .scaledToFill()
+            //.frame(width: geometry.size.width, height: geometry.size.height)
+                .ignoresSafeArea(edges: [.top, .bottom, .trailing])
+                .overlay(
+                    Color.black
+                        .opacity(0.5)
+                        .ignoresSafeArea()
+                )
+            
             // Основний контент
             VStack(spacing: 20) {
                 
